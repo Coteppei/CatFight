@@ -41,7 +41,7 @@ class Player:
         self.is_alive = True
 
     def update(self):
-        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
+        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_x >= pyxel.width // 2:
             pyxel.play(3, 0)
 
     def draw(self):
@@ -107,14 +107,14 @@ class App:
 
         # 味方側操作
         # 画面上部の押下があったとき、ダメージを相手に与える
-        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
+        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_x >= pyxel.width // 2:
             self.enemyLife -= 1
             self.attackFlg = True
             # 攻撃により相手のライフを0にしたとき、クリアを表示する
             if self.enemyLife == 0:
                 self.scene = SCENE_CLEAR
         # 画面下部の押下があったとき、避ける動作をとる
-        elif (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y >= 62:
+        elif (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_x < pyxel.width // 2:
             self.avoidFlg = True
             self.actionFlg = True
         if self.actionFlg:
@@ -155,7 +155,7 @@ class App:
 
     def update_gameover_scene(self):
         if self.life > 0 and (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)):
-            if pyxel.mouse_y < 62:
+            if pyxel.mouse_x >= pyxel.width // 2:
                 self.life -= 1
                 self.scene = SCENE_PLAY
             else:
@@ -166,13 +166,13 @@ class App:
 
     def update_confimation_scene(self):
 
-        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
+        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_x >= pyxel.width // 2:
             self.scene = SCENE_TITLE
-        elif (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y >= 62:
+        elif (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_x < pyxel.width // 2:
             self.scene = SCENE_GAMEOVER
 
     def update_clear_scene(self):
-        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
+        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_x >= pyxel.width // 2:
             self.scene = SCENE_TITLE
 
 # フロント側
@@ -199,7 +199,7 @@ class App:
     def draw_play_scene(self):
         self.player.draw()
 
-        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
+        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_x >= pyxel.width // 2:
             pyxel.blt(0, 10, 2, 0, 0, 100, 80, 7)
         elif self.avoidFlg:
             pyxel.blt(0, 77, 2, 0, 0, 100, 80, 7)
