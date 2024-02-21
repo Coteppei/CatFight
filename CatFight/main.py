@@ -53,6 +53,7 @@ class App:
         pyxel.init(70, 124, title="Cat Fight!!")
         # 画像のロード
         pyxel.load("assets/sample.pyxres")
+        pyxel.mouse(True)
 
         self.scene_start_time = 0  # シーンが始まった時間を保持する変数
         self.scene_duration = 5  # シーンが切り替わるまでの時間（秒）
