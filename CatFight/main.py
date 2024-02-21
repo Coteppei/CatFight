@@ -49,15 +49,18 @@ class Player:
 
 class App:
     def __init__(self):
+        
         # 編集中1
         pyxel.init(70, 124, title="Cat Fight!!")
+        # ポーズ画面
+        self.pause = False # ポーズ状態を管理する変数
+
         # 画像のロード
         pyxel.load("assets/sample.pyxres")
         pyxel.mouse(True)
-
         self.scene_start_time = 0  # シーンが始まった時間を保持する変数
         self.scene_duration = 5  # シーンが切り替わるまでの時間（秒）
-
+        self.mouse_center_y = pyxel.height // 2
         # 味方の画像表示
 
         # 敵の画像表示
@@ -108,51 +111,70 @@ class App:
 
         # 味方側操作
         # 画面上部の押下があったとき、ダメージを相手に与える
-        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
-            self.enemyLife -= 1
-            self.attackFlg = True
-            # 攻撃により相手のライフを0にしたとき、クリアを表示する
-            if self.enemyLife == 0:
-                self.scene = SCENE_CLEAR
-        # 画面下部の押下があったとき、避ける動作をとる
-        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y >= 62:
-            self.avoidFlg = True
-            self.actionFlg = True
-        if self.actionFlg:
-            self.avoid_start_frame = time.time()
-            self.actionFlg = False
-        if self.avoidFlg:
-            if time.time() - self.avoid_start_frame >= 1:  # 60フレームで1秒経過
-                self.avoidFlg = False
+        if not self.pause:
+        
+            if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
+                self.enemyLife -= 1
+                self.attackFlg = True
+                # pyxel.mouse_y = False
+                # self.aaa = pyxel.mouse_y
+                # pyxel.mouse_y = 20
+                # pyxel.mouse_y = self.aaa
+                # self.aaa = False
+                # 攻撃により相手のライフを0にしたとき、クリアを表示する
+                if self.enemyLife == 0:
+                    self.scene = SCENE_CLEAR
+            # 画面下部の押下があったとき、避ける動作をとる
+            if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y >= 62:
+                self.avoidFlg = True
+                self.actionFlg = True
+                # pyxel.mouse_y = False
+                # self.bbb = pyxel.mouse_y
+                # pyxel.mouse_y = 100
+                # pyxel.mouse_y = self.bbb
+            if self.actionFlg:
+                self.avoid_start_frame = time.time()
+                self.actionFlg = False
+            if self.avoidFlg:
+                if time.time() - self.avoid_start_frame >= 1:  # 60フレームで1秒経過
+                    self.avoidFlg = False
 
 
-        # 敵側動作
-        if self.scene_start_time == 0:
-            self.scene_start_time = time.time()
-        # 経過時間を計算
-        elapsed_time = time.time() - self.scene_start_time
-        # 時間経過で攻撃準備
-        if elapsed_time >= self.scene_duration and elapsed_time <= 5.5:
-            pyxel.blt(0, 15, 2, 105, 80, 100, 80, 7)
-        # 攻撃確定
-        elif elapsed_time >= 5.5:
-            pyxel.blt(0, 30, 2, 105, 80, 100, 80, 7)
+            # 敵側動作
+            if self.scene_start_time == 0:
+                self.scene_start_time = time.time()
+            # 経過時間を計算
+            elapsed_time = time.time() - self.scene_start_time
+            # 時間経過で攻撃準備
+            if elapsed_time >= self.scene_duration and elapsed_time <= 5.5:
+                pyxel.blt(0, 15, 2, 105, 80, 100, 80, 7)
+            # 攻撃確定
+            elif elapsed_time >= 5.5:
+                pyxel.blt(0, 30, 2, 105, 80, 100, 80, 7)
 
-            # このとき自分側が避ける動作をしていた場合、攻撃を無効化する
-            if self.avoidFlg == True and elapsed_time >= 6:
-                self.scene_start_time = 0  # 次のシーンのためにリセット
-            # 攻撃後通常位置に戻る
-            elif elapsed_time >= 6:
+                # このとき自分側が避ける動作をしていた場合、攻撃を無効化する
+                if self.avoidFlg == True and elapsed_time >= 6:
+                    self.scene_start_time = 0  # 次のシーンのためにリセット
+                # 攻撃後通常位置に戻る
+                elif elapsed_time >= 6:
+                    # self.scene = SCENE_GAMEOVER
+                    self.uuu = False
+            # 通常位置
+            if elapsed_time < self.scene_duration:
+                pyxel.blt(0, 5, 2, 105, 80, 100, 80, 7)
+
+            for enemy in enemies:
+                pyxel.play(3, 1)
                 self.scene = SCENE_GAMEOVER
-        # 通常位置
-        if elapsed_time < self.scene_duration:
-            pyxel.blt(0, 5, 2, 105, 80, 100, 80, 7)
 
-        for enemy in enemies:
-            pyxel.play(3, 1)
-            self.scene = SCENE_GAMEOVER
+            self.player.update()
+        else:
+            pass
 
-        self.player.update()
+        # ポーズ画面の操作処理  
+        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 10 and pyxel.mouse_x > 60 :
+            # ポーズ状態を反転させる
+            self.pause = not self.pause
 
     def update_gameover_scene(self):
         if self.life > 0 and (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)):
@@ -198,31 +220,34 @@ class App:
         pyxel.text(7, 70, "- GAME START -", 7)
 
     def draw_play_scene(self):
-        self.player.draw()
+        if not self.pause:
+            self.player.draw()
+            if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
+                pyxel.blt(0, 10, 2, 0, 0, 100, 80, 7)
+            elif self.avoidFlg:
+                pyxel.blt(0, 77, 2, 0, 0, 100, 80, 7)
+            else:
+                pyxel.blt(0, 54, 2, 0, 0, 100, 80, 7)
 
-        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
-            pyxel.blt(0, 10, 2, 0, 0, 100, 80, 7)
-        elif self.avoidFlg:
-            pyxel.blt(0, 77, 2, 0, 0, 100, 80, 7)
-        else:
-            pyxel.blt(0, 54, 2, 0, 0, 100, 80, 7)
+            # 敵の画像
+            # シーンが始まった瞬間に時間を設定
+            if self.scene_start_time == 0:
+                self.scene_start_time = time.time()
+            # 経過時間を計算
+            elapsed_time = time.time() - self.scene_start_time
 
-        # 敵の画像
-        # シーンが始まった瞬間に時間を設定
-        if self.scene_start_time == 0:
-            self.scene_start_time = time.time()
-        # 経過時間を計算
-        elapsed_time = time.time() - self.scene_start_time
-
-        if elapsed_time >= self.scene_duration and elapsed_time <= 5.5:
-            pyxel.blt(0, 15, 2, 105, 80, 100, 80, 7)
-        if elapsed_time >= 5.5:
-            pyxel.blt(0, 30, 2, 105, 80, 100, 80, 7)
-            if elapsed_time >= 6:
-                self.scene_start_time = 0  # 次のシーンのためにリセット
-        if elapsed_time < self.scene_duration:
-            pyxel.blt(0, 5, 2, 105, 80, 100, 80, 7)
+            if elapsed_time >= self.scene_duration and elapsed_time <= 5.5:
+                pyxel.blt(0, 15, 2, 105, 80, 100, 80, 7)
+            if elapsed_time >= 5.5:
+                pyxel.blt(0, 30, 2, 105, 80, 100, 80, 7)
+                if elapsed_time >= 6:
+                    self.scene_start_time = 0  # 次のシーンのためにリセット
+            if elapsed_time < self.scene_duration:
+                pyxel.blt(0, 5, 2, 105, 80, 100, 80, 7)
         # 騎士の画像
+        else:
+            pyxel.cls(0)
+            pyxel.text(28, 50, "PAUSE", 7)
 
     def draw_gameover_scene(self):
         if self.life > 0:
