@@ -49,9 +49,9 @@ class Player:
 
 class App:
     def __init__(self):
-        
+
         # 編集中1
-        pyxel.init(70, 124, title="Cat Fight!!")
+        pyxel.init(90, 125, title="Cat Fight!!")
         # ポーズ画面
         self.pause = False # ポーズ状態を管理する変数
 
@@ -113,7 +113,7 @@ class App:
         # 画面上部の押下があったとき、ダメージを相手に与える
         if not self.pause:
         
-            if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 62:
+            if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)):
                 self.enemyLife -= 1
                 self.attackFlg = True
                 # pyxel.mouse_y = False
@@ -125,7 +125,7 @@ class App:
                 if self.enemyLife == 0:
                     self.scene = SCENE_CLEAR
             # 画面下部の押下があったとき、避ける動作をとる
-            if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y >= 62:
+            if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)):
                 self.avoidFlg = True
                 self.actionFlg = True
                 # pyxel.mouse_y = False
@@ -172,7 +172,7 @@ class App:
             pass
 
         # ポーズ画面の操作処理  
-        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A)) and pyxel.mouse_y < 10 and pyxel.mouse_x > 60 :
+        if (pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_X)):
             # ポーズ状態を反転させる
             self.pause = not self.pause
 
@@ -216,8 +216,8 @@ class App:
 
     def draw_title_scene(self):
         # 編集中2
-        pyxel.text(14, 42, "Cat Fight!!", pyxel.frame_count % 16)
-        pyxel.text(7, 70, "- GAME START -", 7)
+        pyxel.text(25, 45, "Cat Fight!!", pyxel.frame_count % 16)
+        pyxel.text(18, 80, "- GAME START -", 7)
 
     def draw_play_scene(self):
         if not self.pause:
