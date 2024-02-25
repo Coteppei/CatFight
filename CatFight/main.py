@@ -75,7 +75,7 @@ class App:
 
         self.background = Background()
         self.player = Player(pyxel.width / 2, pyxel.height - 20)
-        # pyxel.playm(0, loop=True)
+        pyxel.playm(0, loop=True)
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -112,7 +112,7 @@ class App:
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
             self.startTime = time.time()
             self.scene = SCENE_PLAY
-            # pyxel.playm(1, loop=True)
+            pyxel.playm(1, loop=True)
 
     def update_play_scene(self):
 
@@ -136,7 +136,7 @@ class App:
                 # 攻撃により相手のライフを0にしたとき、クリアを表示する
                 if self.enemyLife == 0:
                     self.scene = SCENE_CLEAR
-                    # pyxel.playm(0, loop=True)
+                    pyxel.playm(0, loop=True)
             # 回避動作
             if pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
                 self.avoidFlg = True
@@ -170,7 +170,7 @@ class App:
                     # 攻撃後通常位置に戻るzzzzzzzzzzzz
                     elif elapsed_time >= self.enemyAttack + 0.5:
                         self.scene = SCENE_GAMEOVER
-                        # pyxel.playm(0, loop=True)
+                        pyxel.playm(0, loop=True)
             # 通常位置  デッドロジックのため廃止
             # if elapsed_time < self.scene_duration:
             #     pyxel.blt(0, 5, 2, 105, 80, 100, 80, 7)
@@ -194,7 +194,7 @@ class App:
                 self.pause_pressed_time = time.time()
         if time.time() - self.pause_pressed_time >= 0.5 and self.pause_pressed_time != 0:
             self.pause_pressed_time = 0
-            # pyxel.playm(1, loop=True)
+            pyxel.playm(1, loop=True)
             # ポーズ状態を反転させる
             self.pause = not self.pause
 
@@ -204,7 +204,7 @@ class App:
             self.life -= 1
             self.startTime = time.time()
             self.scene = SCENE_PLAY
-            # pyxel.playm(1, loop=True)
+            pyxel.playm(1, loop=True)
         elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
             self.scene = SCENE_CONFIMATION
         else:
@@ -249,8 +249,30 @@ class App:
     def draw_play_scene(self):
         if not self.pause:
             self.player.draw()
+                # pyxel.blt(20, 10, 0, 0, 0, 100, 80, 15)
+
+            # 敵の画像
+            # シーンが始まった瞬間に時間を設定
+            if self.scene_start_time == 0:
+                self.scene_start_time = self.timeCount
+            # 経過時間を計算
+            elapsed_time = self.timeCount - self.scene_start_time
+
+            # 敵側UI
+            if elapsed_time >= self.enemyAttack - 0.5 and elapsed_time <= self.enemyAttack:
+                # pyxel.blt(10, 15, 2, 105, 80, 100, 80, 7)
+                pyxel.blt(5, 0, 2, 0, 0, 90, 130, 7)
+            if elapsed_time >= self.enemyAttack:
+                # pyxel.blt(10, 30, 2, 105, 80, 100, 80, 7)
+                pyxel.blt(5, 20, 2, 0, 0, 90, 120, 7)
+                if elapsed_time >= self.enemyAttack + 0.5:
+                    self.scene_start_time = 0  # 次のシーンのためにリセット
+            if elapsed_time < self.enemyAttack - 0.5:
+                # pyxel.blt(10, 5, 2, 105, 80, 100, 80, 7)
+                pyxel.blt(5, -20, 2, 0, 0, 90, 120, 7)
+
+            # プレイヤー側UI
             if  (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
-                
                 pyxel.blt(20, 67, 0, 0, 0, 100, 80, 15)         #胴体
                 pyxel.blt(22, 78, 0, 136, 24, 100, 80, 15)       #左腕
             elif self.avoidFlg:
@@ -264,23 +286,8 @@ class App:
                 pyxel.blt(20, 67, 0, 0, 0, 100, 80, 15)         #胴体
                 pyxel.blt(22, 78, 0, 136, 24, 100, 80, 15)       #左腕
 
-                # pyxel.blt(20, 10, 0, 0, 0, 100, 80, 15)
 
-            # 敵の画像
-            # シーンが始まった瞬間に時間を設定
-            if self.scene_start_time == 0:
-                self.scene_start_time = self.timeCount
-            # 経過時間を計算
-            elapsed_time = self.timeCount - self.scene_start_time
 
-            if elapsed_time >= self.enemyAttack - 0.5 and elapsed_time <= self.enemyAttack:
-                pyxel.blt(10, 15, 2, 105, 80, 100, 80, 7)
-            if elapsed_time >= self.enemyAttack:
-                pyxel.blt(10, 30, 2, 105, 80, 100, 80, 7)
-                if elapsed_time >= self.enemyAttack + 0.5:
-                    self.scene_start_time = 0  # 次のシーンのためにリセット
-            if elapsed_time < self.enemyAttack - 0.5:
-                pyxel.blt(10, 5, 2, 105, 80, 100, 80, 7)
 
             # 敵の体の上に腕を表示したいため、右腕のみ下にセット
             if  (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
