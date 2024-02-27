@@ -40,7 +40,6 @@ class Background:
 class Player:
     def __init__(self, x, y):
         self.is_alive = True
-        
 
     def update(self):       # 攻撃したときのSE音
         # if (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)):
@@ -107,6 +106,7 @@ class App:
         self.scene_start_time = 0  # シーンが始まった時間を保持する変数
         self.scene_duration = self.enemyAttack - 0.5  # シーンが切り替わるまでの時間（秒）
         self.punchFlg = True #Trueでパンチ可能状態
+        self.avoidanceRestrictions = 30 # 回避回数を制限
 
         pyxel.image(1).load(0, 0, "assets/CatFight_OP.png")
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
@@ -138,17 +138,20 @@ class App:
                     self.scene = SCENE_CLEAR
                     pyxel.playm(0, loop=True)
             # 回避動作
-            if pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
-                self.avoidFlg = True
-                self.actionFlg = True
-                self.punchFlg = False
-            if self.actionFlg:
-                self.avoid_start_frame = self.timeCount
-                self.actionFlg = False
-            if self.avoidFlg:
-                if self.timeCount - self.avoid_start_frame >= 0.5:  # 0.5秒間回避
-                    self.avoidFlg = False
-                    self.punchFlg = True
+            if self.avoidanceRestrictions >= 1:
+                if pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
+                    self.avoidFlg = True
+                    self.actionFlg = True
+                    self.punchFlg = False
+                if self.actionFlg:
+                    self.avoid_start_frame = self.timeCount
+                    self.actionFlg = False
+                if self.avoidFlg:
+                    if self.timeCount - self.avoid_start_frame >= 0.5:  # 0.5秒間回避
+                        self.avoidFlg = False
+                        self.punchFlg = True
+                        self.avoidanceRestrictions -=1
+                        self.enemyLife += 10
 
             # 敵側動作
             if self.scene_start_time == 0:
@@ -261,15 +264,15 @@ class App:
             # 敵側UI
             if elapsed_time >= self.enemyAttack - 0.5 and elapsed_time <= self.enemyAttack:
                 # pyxel.blt(10, 15, 2, 105, 80, 100, 80, 7)
-                pyxel.blt(5, 0, 2, 0, 0, 90, 130, 7)
+                pyxel.blt(5, 0, 2, 0, 0, 90, 130, 3)
             if elapsed_time >= self.enemyAttack:
                 # pyxel.blt(10, 30, 2, 105, 80, 100, 80, 7)
-                pyxel.blt(5, 20, 2, 0, 0, 90, 120, 7)
+                pyxel.blt(5, 20, 2, 0, 0, 90, 120, 3)
                 if elapsed_time >= self.enemyAttack + 0.5:
                     self.scene_start_time = 0  # 次のシーンのためにリセット
             if elapsed_time < self.enemyAttack - 0.5:
                 # pyxel.blt(10, 5, 2, 105, 80, 100, 80, 7)
-                pyxel.blt(5, -20, 2, 0, 0, 90, 120, 7)
+                pyxel.blt(5, -20, 2, 0, 0, 90, 120, 3)
 
             # プレイヤー側UI
             if  (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
