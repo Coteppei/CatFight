@@ -116,6 +116,8 @@ class App:
         self.pouseCount = 3                 # ポーズの回数を制限
         self.pouseFlg = False               # 現在がポーズ状態か判定
 
+        pyxel.image(1).load(0, 0, "assets/ring.png")
+        pyxel.image(1).load(0, 0, "assets/firstLoading.png")
         pyxel.image(1).load(0, 0, "assets/CatFight_OP.png")
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
             self.battleStage = 1
@@ -136,7 +138,7 @@ class App:
             self.startTime = time.time() + 3
             if time.time() > self.loudingTimeCount + 5:
                 self.enemyAttack = random.uniform(7, 8.5)
-                self.scene = SCENE_PLAY
+                self.scene = SCENE_SECOND_PLAY
                 pyxel.playm(1, loop=True)
 
     # バトル画面
