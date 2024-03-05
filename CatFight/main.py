@@ -98,7 +98,7 @@ class App:
     def update_title_scene(self):
         self.life = 2
         self.IfLihe = self.life
-        self.enemyLife = 80
+        self.enemyLife = 8
         self.avoidFlg = False
         self.actionFlg = False
         self.avoid_start_frame = 0          # 避ける時間を計測
@@ -141,7 +141,7 @@ class App:
             pyxel.image(1).load(0, 0, "assets/2ndLoading.png")
             # self.startTime = time.time() + 3
             if time.time() > self.loudingTimeCount + 5:
-                self.enemyLife = 120
+                self.enemyLife = 12
                 self.enemyAttack = random.uniform(7, 8.5)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
                 self.pause_pressed_time = 0     # 前バトルでのポーズじかんけいそくをリセット
@@ -347,18 +347,18 @@ class App:
             self.pause = not self.pause
     # ゲームオーバー画面
     def update_gameover_scene(self):
-        if self.life > 0 and pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
+        if self.life > 0 and pyxel.btnp(pyxel.KEY_UP) or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
             self.pouseCount = 3
             self.life -= 1
             # self.startTime = time.time()
             self.scene = SCENE_BATTLE
             pyxel.playm(1, loop=True)
             if self.battleStage == 1:
-                random.uniform(3, 5.5)
+                random.uniform(1.5, 3.5)
                 self.scene = SCENE_BATTLE
             elif self.battleStage == 2:
-                random.uniform(3, 5.5)
-                self.scene_start_time = 0
+                random.uniform(1.5, 4.5)
+                # self.scene_start_time = 0
                 self.scene = SCENE_SECOND_BATTLE
         elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
             self.scene = SCENE_CONFIMATION
