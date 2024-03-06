@@ -300,8 +300,6 @@ class App:
                     # self.scene_start_time = 0  # 次のシーンのためにリセット
                     # self.enemyAttack = random.uniform(1, 5)   # 次の敵攻撃感覚のリセット
 
-            # 経過時間を計算
-            elapsed_time = self.timeCount - self.scene_start_time
             # 攻撃動作
             # ヒップストライク
             if elapsed_time >= self.enemyAttack and self.hipstrikeFlg:
@@ -377,6 +375,7 @@ class App:
     def update_clear_scene(self):
         if pyxel.btnp(pyxel.KEY_Z) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A):
             self.battleStage += 1
+            self.scene_start_time = 0
             self.loudingTimeCount = time.time()
             self.scene = SCENE_LOADING
 
