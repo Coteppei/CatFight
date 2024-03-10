@@ -59,12 +59,8 @@ class App:
         self.pause = False # ポーズ状態を管理する変数
 
         # 画像のロード
-
         pyxel.load("assets/character.pyxres")
-
         self.mouse_center_y = pyxel.height // 2
-
-        # 味方の画像表示
 
         # 敵の画像表示
         pyxel.sounds[0].set("a3a2c1a1", "p", "7", "s", 5)
@@ -101,7 +97,7 @@ class App:
     def update_title_scene(self):
         self.life = 2
         self.IfLihe = self.life
-        self.enemyLife = 1                  # ブランケンの体力
+        self.enemyLife = 80                  # ブランケンの体力
         self.avoidFlg = False
         self.actionFlg = False
         self.avoid_start_frame = 0          # 避ける時間を計測
@@ -112,7 +108,6 @@ class App:
         self.pause_pressed_time = 0         # ポーズボタンを押したときのタイムラグを設定
         self.enemyAttack = 0
         self.scene_start_time = 0  # シーンが始まった時間を保持する変数
-        # self.scene_duration = self.enemyAttack - 0.5  # シーンが切り替わるまでの時間（秒）
         self.punchFlg = True #Trueでパンチ可能状態
         self.avoidanceRestrictions = 30 # 回避回数を制限
         self.loudingTimeCount = 0           # ローディング画面開始からの時間を計測
@@ -129,13 +124,13 @@ class App:
 
         pyxel.image(1).load(0, 0, "assets/firstLoading.png")    # 1回目のロード画面
         pyxel.image(1).load(0, 0, "assets/2ndLoading.png")      # 2回目のロード画面
-        pyxel.image(1).load(0, 0, "assets/2ndLoading.png")      # 3回目のロード画面
+        pyxel.image(1).load(0, 0, "assets/3rdLoading.png")      # 3回目のロード画面
         pyxel.image(1).load(0, 0, "assets/ring.png")            # 1回戦目の背景
         pyxel.image(1).load(0, 0, "assets/2ndRing.png")         # 2回戦目の背景
         pyxel.image(1).load(0, 0, "assets/3rdRing.png")         # 3回戦目の背景
         pyxel.image(1).load(0, 0, "assets/CatFight_OP.png")     # オープニング画面
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
-            self.battleStage = 2                                # ステージ設定
+            self.battleStage = 1                                # ステージ設定
             self.loudingTimeCount = time.time()
             self.scene = SCENE_LOADING
 
@@ -143,17 +138,15 @@ class App:
     def update_loading_scene(self):
         if self.battleStage == 1:
             pyxel.image(1).load(0, 0, "assets/firstLoading.png")
-            # self.startTime = time.time() + 3
             if time.time() > self.loudingTimeCount + 5:
                 self.enemyAttack = random.uniform(7, 8.5)
                 self.scene = SCENE_BATTLE
                 pyxel.playm(1, loop=True)
         elif self.battleStage == 2:
             pyxel.image(1).load(0, 0, "assets/2ndLoading.png")
-            # self.startTime = time.time() + 3
             if time.time() > self.loudingTimeCount + 5:
-                self.enemyLife = 1             # 一トンの体力
-                self.enemyAttack = random.uniform(7, 8.5)
+                self.enemyLife = 120             # 一トンの体力
+                self.enemyAttack = random.uniform(10, 11.5)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
                 self.pause_pressed_time = 0     # 前バトルでのポーズ時間の計測をリセット
                 self.scene = SCENE_SECOND_BATTLE
@@ -161,8 +154,8 @@ class App:
         elif self.battleStage == 3:
             pyxel.image(1).load(0, 0, "assets/3rdLoading.png")
             if time.time() > self.loudingTimeCount + 5:
-                self.enemyLife = 1             # リラマッチョの体力
-                self.enemyAttack = random.uniform(7, 8.5)
+                self.enemyLife = 200             # リラマッチョの体力
+                self.enemyAttack = random.uniform(10, 11.5)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
                 self.pause_pressed_time = 0     # 前バトルでのポーズ時間の計測をリセット
                 self.scene = SCENE_THIRD_BATTLE
@@ -253,7 +246,7 @@ class App:
 
     # 二回戦目バトル画面
     def update_second_battle_scene(self):
-                # 背景画面
+        # 背景画面
         pyxel.image(1).load(0, 0, "assets/2ndRing.png")
         # プレイヤー側操作
         # 画面上部の押下があったとき、ダメージを相手に与える
@@ -314,12 +307,8 @@ class App:
                     self.patternJudge = False   # 攻撃判断をリセットする
                 # 避けれていなかったらゲームオーバー
                 elif elapsed_time >= self.enemyAttack + 0.5:
-
-                    #デバッグ状態
                     self.scene = SCENE_GAMEOVER
                     pyxel.playm(0, loop=True)
-                    # self.scene_start_time = 0  # 次のシーンのためにリセット
-                    # self.enemyAttack = random.uniform(1, 5)   # 次の敵攻撃感覚のリセット
 
             # 攻撃動作
             # ヒップストライク
@@ -471,7 +460,6 @@ class App:
                     self.enemyAttack = random.uniform(5, 7.5)   # 次の敵攻撃感覚のリセット
                     self.patternJudge = False  # 攻撃判断をリセットする
 
-
             for enemy in enemies:
                 pyxel.play(3, 1)
                 self.scene = SCENE_GAMEOVER
@@ -510,18 +498,16 @@ class App:
             self.retry = False
             self.pouseCount = 3
             self.life -= 1
-            # self.startTime = time.time()
             self.scene = SCENE_BATTLE
             pyxel.playm(1, loop=True)
             if self.battleStage == 1:
-                random.uniform(1.5, 3.5)
+                self.enemyAttack = random.uniform(7, 8.5)
                 self.scene = SCENE_BATTLE
             elif self.battleStage == 2:
-                random.uniform(1.5, 4.5)
-                # self.scene_start_time = 0
+                self.enemyAttack = random.uniform(7, 8.5)
                 self.scene = SCENE_SECOND_BATTLE
             elif self.battleStage == 3:
-                random.uniform(1.5, 4.5)
+                self.enemyAttack = random.uniform(8, 9.5)
                 self.scene = SCENE_THIRD_BATTLE
         elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
             # 下ボタンを押すとエンドフラグを立てる
@@ -536,7 +522,7 @@ class App:
             # 残機を失ったら強制ゲームオーバー
             if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
                 self.scene = SCENE_TITLE
-        elif self.life > 0 and pyxel.btnp(pyxel.KEY_S) and not self.retry and not self.retry or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and not self.retry and not self.retry:
+        elif self.life > 0 and pyxel.btnp(pyxel.KEY_W) and not self.retry and not self.retry or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_Y) and not self.retry and not self.retry:
             self.retry = True
             self.end = False
 
@@ -605,8 +591,6 @@ class App:
     def draw_battle_scene(self):
         if not self.pause:
             self.player.draw()
-                # pyxel.blt(20, 10, 0, 0, 0, 100, 80, 15)
-
             # 敵の画像
             # シーンが始まった瞬間に時間を設定
             if self.scene_start_time == 0:
@@ -682,18 +666,12 @@ class App:
                     pyxel.blt(62, 81, 2, 168, 192, 21, 23, 10)        # 左足
                 if elapsed_time >= self.enemyAttack and elapsed_time <= self.enemyAttack + 0.3:
 
-                    # if self.hipstrikeFlg:
-                    #     pyxel.blt(-15, 43, 2, 88, 175, 64, 70, 10)         # 胴体
-                    # else:
                     # 攻撃直前
                     pyxel.blt(13, 43, 2, 88, 175, 64, 70, 10)        # 胴体
                     pyxel.blt(20, 30, 2, 16, 160, 55, 48, 10)        # 頭部
                     pyxel.blt(12, 83, 2, 160, 160, 21, 26, 10)        # 右足
                     pyxel.blt(62, 91, 2, 168, 192, 21, 23, 10)        # 左足
                 elif elapsed_time >= self.enemyAttack + 0.3:
-                    # if self.hipstrikeFlg:
-                    #     pyxel.blt(60, 83, 2, 88, 175, 64, 70, 10)         # 胴体
-                    # else:
                     pyxel.blt(13, 43, 2, 88, 175, 64, 70, 10)        # 胴体
                     pyxel.blt(12, 83, 2, 160, 160, 21, 26, 10)        # 右足
                     pyxel.blt(62, 91, 2, 168, 192, 21, 23, 10)        # 左足
@@ -763,7 +741,6 @@ class App:
     def draw_third_battle_scene(self):
         if not self.pause:
             self.player.draw()
-                # pyxel.blt(20, 10, 0, 0, 0, 100, 80, 15)
 
             # 敵の画像
             # シーンが始まった瞬間に時間を設定
@@ -785,22 +762,16 @@ class App:
                     pyxel.blt(-3, 14, 1, 90, 25, 168, 144, 6)      #胴体
                     pyxel.blt(6, 54, 1, 170, 153, 29, 46, 6)      #右腕
                     pyxel.blt(43, 54, 1, 208, 153, 35, 46, 6)     #左腕
-                    # pyxel.blt(5, 10, 2, 0, 0, 90, 130, 3)        #胴体
-                    # pyxel.blt(5, 10, 2, 96, 0, 90, 130, 3)        #右腕
                 elif elapsed_time >= self.enemyAttack + 0.3:
                     pyxel.blt(-3, 14, 1, 90, 25, 168, 144, 6)      #胴体
                     pyxel.blt(43, 54, 1, 208, 153, 35, 46, 6)     #左腕
                     if elapsed_time >= self.enemyAttack + 0.5:
-
-                        # pyxel.blt(5, 10, 2, 0, 0, 90, 130, 3)   #胴体
                         self.scene_start_time = 0  # 次のシーンのためにリセット
                 if elapsed_time < self.enemyAttack - 0.5:
                     # 通常状態
                     pyxel.blt(3, 0, 1, 90, 25, 168, 144, 6)      #胴体
                     pyxel.blt(11, 40, 1, 170, 153, 29, 46, 6)      #右腕
                     pyxel.blt(49, 40, 1, 208, 153, 35, 46, 6)      #左腕
-                    # pyxel.blt(0, 80, 1, 24, 104, 70, 144, 6)      #下半身
-                    # pyxel.blt(5, -30, 2, 96, 0, 90, 120, 3)      #右腕
             elif self.left_hand_flg:
                 # 左手攻撃
                 if elapsed_time >= self.enemyAttack - 0.5 and elapsed_time <= self.enemyAttack:
@@ -916,7 +887,7 @@ class App:
                 pyxel.text(30, 45, "CONTINUE", 13)
                 pyxel.text(41, 80, "END", 7)
             else:
-                pyxel.text(29, 50, "YOU LOSE", 8)
+                pyxel.text(29, 60, "YOU LOSE", 8)
         else:
             pyxel.text(29, 60, "GAME OVER", 8)
 
