@@ -15,7 +15,6 @@ SCENE_THIRD_BATTLE = 7  # 最終戦戦闘画面
 # 敵キャラのインスタンス
 enemies = []
 
-
 def load_bgm(msc, filename, snd1, snd2, snd3):
     # Loads a json file for 8bit BGM generator by frenchbread.
     # Each track is stored in snd1, snd2 and snd3 of the sound
@@ -324,8 +323,6 @@ class App:
                     #デバッグ状態
                     self.scene = SCENE_GAMEOVER
                     pyxel.playm(0, loop=True)
-                    # self.scene_start_time = 0  # 次のシーンのためにリセット
-                    # self.enemyAttack = random.uniform(1, 5)   # 次の敵攻撃感覚のリセット
 
             for enemy in enemies:
                 pyxel.play(3, 1)
@@ -493,6 +490,7 @@ class App:
             # 上ボタンを押すとリトライを立てる
             self.retry = True
             self.end = False
+            self.pauseTimeCount = 0
         elif pyxel.btnp(pyxel.KEY_S) and self.retry or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.retry:
             # リトライフラグが立っていると再挑戦する
             self.retry = False
@@ -501,13 +499,13 @@ class App:
             self.scene = SCENE_BATTLE
             pyxel.playm(1, loop=True)
             if self.battleStage == 1:
-                self.enemyAttack = random.uniform(7, 8.5)
+                self.enemyAttack = random.uniform(6, 7.5)
                 self.scene = SCENE_BATTLE
             elif self.battleStage == 2:
-                self.enemyAttack = random.uniform(7, 8.5)
+                self.enemyAttack = random.uniform(6, 7)
                 self.scene = SCENE_SECOND_BATTLE
             elif self.battleStage == 3:
-                self.enemyAttack = random.uniform(8, 9.5)
+                self.enemyAttack = random.uniform(5, 5.5)
                 self.scene = SCENE_THIRD_BATTLE
         elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
             # 下ボタンを押すとエンドフラグを立てる
@@ -549,6 +547,7 @@ class App:
     def update_clear_scene(self):
         if pyxel.btnp(pyxel.KEY_W) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_Y) and self.battleStage < 3:
             self.nextFlg = True
+            self.pauseTimeCount = 0
         elif pyxel.btnp(pyxel.KEY_S) and self.nextFlg and self.battleStage < 3 or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.nextFlg and self.battleStage < 3:
             self.nextFlg = False
             self.battleStage += 1
@@ -657,9 +656,6 @@ class App:
             if not self.hipstrikeFlg:
                 if elapsed_time >= self.enemyAttack - 0.5 and elapsed_time <= self.enemyAttack:
                     # 攻撃準備
-                    # if self.hipstrikeFlg:
-                    #     pyxel.blt(0, 43, 2, 88, 175, 64, 70, 10)      # 胴体
-                    # else:
                     pyxel.blt(13, 33, 2, 88, 175, 64, 70, 10)      # 胴体
                     pyxel.blt(20, 20, 2, 16, 160, 55, 48, 10)        # 頭部
                     pyxel.blt(12, 73, 2, 160, 160, 21, 26, 10)        # 右足
