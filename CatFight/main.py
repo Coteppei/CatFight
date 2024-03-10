@@ -120,6 +120,7 @@ class App:
         self.retry = False                  # リトライを決定するためのフラグ
         self.end = False                    # ゲームをやめるためのフラグ
         self.nextFlg = False                # 次のステージへ遷移するためのフラグ
+        self.startTimeFlg = False           # バトル開始時間を計測開始するためのフラグ
 
         pyxel.image(1).load(0, 0, "assets/firstLoading.png")    # 1回目のロード画面
         pyxel.image(1).load(0, 0, "assets/2ndLoading.png")      # 2回目のロード画面
@@ -138,25 +139,28 @@ class App:
         if self.battleStage == 1:
             pyxel.image(1).load(0, 0, "assets/firstLoading.png")
             if time.time() > self.loudingTimeCount + 5:
-                self.enemyAttack = random.uniform(7, 8.5)
+                self.enemyAttack = random.uniform(6, 7.5)
+                self.startTimeFlg = True
                 self.scene = SCENE_BATTLE
                 pyxel.playm(1, loop=True)
         elif self.battleStage == 2:
             pyxel.image(1).load(0, 0, "assets/2ndLoading.png")
             if time.time() > self.loudingTimeCount + 5:
                 self.enemyLife = 120             # 一トンの体力
-                self.enemyAttack = random.uniform(10, 11.5)
+                self.enemyAttack = random.uniform(5.5, 6.5)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
                 self.pause_pressed_time = 0     # 前バトルでのポーズ時間の計測をリセット
+                self.startTimeFlg = True
                 self.scene = SCENE_SECOND_BATTLE
                 pyxel.playm(1, loop=True)
         elif self.battleStage == 3:
             pyxel.image(1).load(0, 0, "assets/3rdLoading.png")
             if time.time() > self.loudingTimeCount + 5:
                 self.enemyLife = 200             # リラマッチョの体力
-                self.enemyAttack = random.uniform(10, 11.5)
+                self.enemyAttack = random.uniform(5, 6)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
                 self.pause_pressed_time = 0     # 前バトルでのポーズ時間の計測をリセット
+                self.startTimeFlg = True
                 self.scene = SCENE_THIRD_BATTLE
                 self.patternJudge = False       # ジャッジフラグのリセット
                 pyxel.playm(1, loop=True)
@@ -201,15 +205,16 @@ class App:
                         self.enemyLife += 10
 
             # 敵側動作
-            if self.scene_start_time == 0:
+            if self.startTimeFlg:
                 self.scene_start_time = self.timeCount
+                self.startTimeFlg = False
             # 経過時間を計算
             elapsed_time = self.timeCount - self.scene_start_time
             # 攻撃動作
             if elapsed_time >= self.enemyAttack:
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.5:
-                    self.scene_start_time = 0  # 次のシーンのためにリセット
+                    self.startTimeFlg = True  # 次のシーンのためにリセット
                     self.enemyAttack = random.uniform(2.5, 4.5)   # 次の敵攻撃感覚のリセット
                 # 攻撃後通常位置に戻る
                 elif elapsed_time >= self.enemyAttack + 0.5:
@@ -292,8 +297,9 @@ class App:
                 self.hipstrikeFlg = False
                 self.patternJudge = True
 
-            if self.scene_start_time == 0:
+            if self.startTimeFlg:
                 self.scene_start_time = self.timeCount
+                self.startTimeFlg = False
             # 経過時間を計算
             elapsed_time = self.timeCount - self.scene_start_time
             # 攻撃動作
@@ -301,7 +307,7 @@ class App:
             if elapsed_time >= self.enemyAttack and not self.hipstrikeFlg:
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.5:
-                    self.scene_start_time = 0  # 次のシーンのためにリセット
+                    self.startTimeFlg = True  # 次のシーンのためにフラグセット
                     self.enemyAttack = random.uniform(1.5, 5)   # 次の敵攻撃感覚のリセット
                     self.patternJudge = False  # 攻撃判断をリセットする
                 # 避けれていなかったらゲームオーバー
@@ -412,15 +418,16 @@ class App:
                     self.combo_flg = True
                     self.patternJudge = True
 
-            if self.scene_start_time == 0:
+            if self.startTimeFlg:
                 self.scene_start_time = self.timeCount
+                self.startTimeFlg = False
             # 経過時間を計算
             elapsed_time = self.timeCount - self.scene_start_time
             # 右手攻撃動作
             if elapsed_time >= self.enemyAttack and self.right_hand_flg:
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.5:
-                    self.scene_start_time = 0  # 次のシーンのためにリセット
+                    self.startTimeFlg = True  # 次のシーンのためにフラグを立てる
                     self.enemyAttack = random.uniform(0.8, 5.0)   # 次の敵攻撃感覚のリセット
                     self.patternJudge = False   # 攻撃判断をリセットする
                 # 攻撃後通常位置に戻る
@@ -501,13 +508,16 @@ class App:
             if self.battleStage == 1:
                 self.enemyAttack = random.uniform(5, 7.5)
                 self.scene_start_time = 0
+                self.startTimeFlg = True
                 self.scene = SCENE_BATTLE
             elif self.battleStage == 2:
                 self.enemyAttack = random.uniform(4.5, 6.5)
                 self.scene_start_time = 0
+                self.startTimeFlg = True
                 self.scene = SCENE_SECOND_BATTLE
             elif self.battleStage == 3:
                 self.enemyAttack = random.uniform(4, 6)
+                self.startTimeFlg = True
                 self.scene_start_time = 0
                 self.scene = SCENE_THIRD_BATTLE
         elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
