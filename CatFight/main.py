@@ -96,7 +96,7 @@ class App:
     def update_title_scene(self):
         self.life = 2
         self.IfLihe = self.life
-        self.enemyLife = 80                  # ブランケンの体力
+        self.enemyLife = 80                 # ブランケンの体力
         self.avoidFlg = False
         self.actionFlg = False
         self.avoid_start_frame = 0          # 避ける時間を計測
@@ -106,9 +106,9 @@ class App:
         self.pauseEnemyFlg = False          # ポーズによって止まる敵の動作用
         self.pause_pressed_time = 0         # ポーズボタンを押したときのタイムラグを設定
         self.enemyAttack = 0
-        self.scene_start_time = 0  # シーンが始まった時間を保持する変数
-        self.punchFlg = True #Trueでパンチ可能状態
-        self.avoidanceRestrictions = 30 # 回避回数を制限
+        self.scene_start_time = 0           # シーンが始まった時間を保持する変数
+        self.punchFlg = True                #Trueでパンチ可能状態
+        self.avoidanceRestrictions = 30     # 回避回数を制限
         self.loudingTimeCount = 0           # ローディング画面開始からの時間を計測
         self.pouseCount = 3                 # ポーズの回数を制限
         self.pouseFlg = False               # 現在がポーズ状態か判定
@@ -303,7 +303,7 @@ class App:
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.5:
                     self.scene_start_time = 0  # 次のシーンのためにリセット
                     self.enemyAttack = random.uniform(1.5, 5)   # 次の敵攻撃感覚のリセット
-                    self.patternJudge = False   # 攻撃判断をリセットする
+                    self.patternJudge = False  # 攻撃判断をリセットする
                 # 避けれていなかったらゲームオーバー
                 elif elapsed_time >= self.enemyAttack + 0.5:
                     self.scene = SCENE_GAMEOVER
@@ -499,13 +499,16 @@ class App:
             self.scene = SCENE_BATTLE
             pyxel.playm(1, loop=True)
             if self.battleStage == 1:
-                self.enemyAttack = random.uniform(6, 7.5)
+                self.enemyAttack = random.uniform(5, 7.5)
+                self.scene_start_time = 0
                 self.scene = SCENE_BATTLE
             elif self.battleStage == 2:
-                self.enemyAttack = random.uniform(6, 7)
+                self.enemyAttack = random.uniform(4.5, 6.5)
+                self.scene_start_time = 0
                 self.scene = SCENE_SECOND_BATTLE
             elif self.battleStage == 3:
-                self.enemyAttack = random.uniform(5, 5.5)
+                self.enemyAttack = random.uniform(4, 6)
+                self.scene_start_time = 0
                 self.scene = SCENE_THIRD_BATTLE
         elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
             # 下ボタンを押すとエンドフラグを立てる
