@@ -131,7 +131,7 @@ class App:
         pyxel.image(1).load(0, 0, "assets/3rdRing.png")         # 3回戦目の背景
         pyxel.image(1).load(0, 0, "assets/CatFight_OP.png")     # オープニング画面
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
-            self.battleStage = 1                                # ステージ設定
+            self.battleStage = 3                                # ステージ設定
             self.loudingTimeCount = time.time()
             self.scene = SCENE_LOADING
 
@@ -902,12 +902,12 @@ class App:
     def draw_gameover_scene(self):
         if self.life > 0:
             if self.retry:
-                pyxel.text(33, 25, "RETRY?", 8)
-                pyxel.text(30, 45, "CONTINUE", 7)
+                pyxel.text(30, 25, "CONTINUE?", 8)
+                pyxel.text(39, 45, "YES!", 7)
                 pyxel.text(41, 80, "END", 13)
             elif self.end:
-                pyxel.text(33, 25, "RETRY?", 8)
-                pyxel.text(30, 45, "CONTINUE", 13)
+                pyxel.text(30, 25, "CONTINUE?", 8)
+                pyxel.text(39, 45, "YES!", 13)
                 pyxel.text(41, 80, "END", 7)
             else:
                 pyxel.text(29, 60, "YOU LOSE", 8)
@@ -929,6 +929,10 @@ class App:
             pyxel.text(33, 60, "YOU WIN", 7)
         elif self.battleStage < 3 and self.nextFlg:
             pyxel.text(26, 60, "NEXT STAGE!!", 7)
+        elif self.life == 2:
+            pyxel.text(10, 55, "No Continue CLEAR", pyxel.frame_count % 16)
+            pyxel.text(27, 65, "Congrats!", pyxel.frame_count % 16)
         else:
-            pyxel.text(27, 55, "Congrats!", 7)
+            pyxel.text(27, 55, "Congrats!", pyxel.frame_count % 10)
+
 App()
