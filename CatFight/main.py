@@ -131,7 +131,7 @@ class App:
         pyxel.image(1).load(0, 0, "assets/3rdRing.png")         # 3回戦目の背景
         pyxel.image(1).load(0, 0, "assets/CatFight_OP.png")     # オープニング画面
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
-            self.battleStage = 3                                # ステージ設定
+            self.battleStage = 1                                # ステージ設定
             self.loudingTimeCount = time.time()
             self.scene = SCENE_LOADING
 
