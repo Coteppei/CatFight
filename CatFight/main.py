@@ -96,7 +96,8 @@ class App:
     def update_title_scene(self):
         self.life = 2
         self.IfLihe = self.life
-        self.enemyLife = 100                 # ブランケンの体力
+        self.enemyLife = 120                 # ブランケンの体力
+        self.maxEnemyLife = self.enemyLife
         self.avoidFlg = False
         self.actionFlg = False
         self.avoid_start_frame = 0          # 避ける時間を計測
@@ -108,7 +109,7 @@ class App:
         self.enemyAttack = 0
         self.scene_start_time = 0           # シーンが始まった時間を保持する変数
         self.punchFlg = True                #Trueでパンチ可能状態
-        self.avoidanceRestrictions = 30     # 回避回数を制限
+        self.avoidanceRestrictions = 99     # 回避回数を制限
         self.loudingTimeCount = 0           # ローディング画面開始からの時間を計測
         self.pouseCount = 1                 # ポーズの回数を制限
         self.pouseFlg = False               # 現在がポーズ状態か判定
@@ -131,7 +132,7 @@ class App:
         pyxel.image(1).load(0, 0, "assets/3rdRing.png")         # 3回戦目の背景
         pyxel.image(1).load(0, 0, "assets/CatFight_OP.png")     # オープニング画面
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
-            self.battleStage = 1                                # ステージ設定
+            self.battleStage = 3                                # ステージ設定
             self.loudingTimeCount = time.time()
             self.scene = SCENE_LOADING
 
@@ -148,7 +149,8 @@ class App:
             pyxel.image(1).load(0, 0, "assets/2ndLoading.png")
             if time.time() > self.loudingTimeCount + 5:
                 self.pouseCount = 1             # ポーズの回数を制限
-                self.enemyLife = 140            # 一トンの体力
+                self.enemyLife = 160            # 一トンの体力
+                self.maxEnemyLife = self.enemyLife
                 self.enemyAttack = random.uniform(5.5, 6.5)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
                 self.pause_pressed_time = 0     # 前バトルでのポーズ時間の計測をリセット
@@ -161,8 +163,9 @@ class App:
             pyxel.image(1).load(0, 0, "assets/3rdLoading.png")
             if time.time() > self.loudingTimeCount + 5:
                 self.pouseCount = 1              # ポーズの回数を制限
-                self.enemyLife = 200             # リラマッチョの体力
-                self.enemyAttack = random.uniform(5, 6)
+                self.enemyLife = 240             # リラマッチョの体力
+                self.maxEnemyLife = self.enemyLife
+                self.enemyAttack = random.uniform(3, 6)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
                 self.pause_pressed_time = 0     # 前バトルでのポーズ時間の計測をリセット
                 self.pauseTimeCount = 0         # ポーズカウントを0にする
@@ -212,7 +215,10 @@ class App:
                         self.avoidFlg = False
                         self.punchFlg = True
                         self.avoidanceRestrictions -=1
-                        self.enemyLife += 10
+                        if self.enemyLife < self.maxEnemyLife - 10:  # 敵の体力が最大値-10未満の場合に加算
+                            self.enemyLife += 10
+                        elif self.enemyLife >= self.maxEnemyLife -10 and self.enemyLife < self.maxEnemyLife:  # 最大値-10以上かつ最大値未満の場合に強制的にmax値にする
+                            self.enemyLife = self.maxEnemyLife
 
             if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
                 self.disableAvoidFlg = False
@@ -297,7 +303,10 @@ class App:
                         self.avoidFlg = False
                         self.punchFlg = True
                         self.avoidanceRestrictions -=1
-                        self.enemyLife += 10
+                        if self.enemyLife < self.maxEnemyLife - 10:  # 敵の体力が最大値-10未満の場合に加算
+                            self.enemyLife += 10
+                        elif self.enemyLife >= self.maxEnemyLife -10 and self.enemyLife < self.maxEnemyLife:  # 最大値-10以上かつ最大値未満の場合に強制的にmax値にする
+                            self.enemyLife = self.maxEnemyLife
 
             if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
                 self.disableAvoidFlg = False
@@ -410,7 +419,10 @@ class App:
                         self.avoidFlg = False
                         self.punchFlg = True
                         self.avoidanceRestrictions -=1
-                        self.enemyLife += 10
+                        if self.enemyLife < self.maxEnemyLife - 10:  # 敵の体力が最大値-10未満の場合に加算
+                            self.enemyLife += 10
+                        elif self.enemyLife >= self.maxEnemyLife -10 and self.enemyLife < self.maxEnemyLife:  # 最大値-10以上かつ最大値未満の場合に強制的にmax値にする
+                            self.enemyLife = self.maxEnemyLife
 
             if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
                 self.disableAvoidFlg = False
@@ -419,12 +431,12 @@ class App:
             # 35%右手攻撃、35%左手攻撃、30%コンボ攻撃
             num = random.random()
             if not self.patternJudge:
-                if num < 0.4:
+                if num < 0.35:
                     self.right_hand_flg = True
                     self.left_hand_flg = False
                     self.combo_flg = False
                     self.patternJudge = True
-                elif num < 0.8:
+                elif num < 0.7:
                     self.right_hand_flg = False
                     self.left_hand_flg = True
                     self.combo_flg = False
@@ -445,7 +457,10 @@ class App:
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.5:
                     self.startTimeFlg = True  # 次のシーンのためにフラグを立てる
-                    self.enemyAttack = random.uniform(0.8, 5.0)   # 次の敵攻撃感覚のリセット
+                    if self.life == 2:        # ノーコンティニューの場合
+                        self.enemyAttack = random.uniform(1, 2.0)   # 次の敵攻撃感覚のリセット
+                    else:                     # コンティニューあり
+                        self.enemyAttack = random.uniform(1, 3.5)     # 次の敵攻撃感覚のリセット
                     self.patternJudge = False   # 攻撃判断をリセットする
                 # 攻撃後通常位置に戻る
                 elif elapsed_time >= self.enemyAttack + 0.5:
@@ -457,7 +472,10 @@ class App:
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.75:
                     self.scene_start_time = 0  # 次のシーンのためにリセット
-                    self.enemyAttack = random.uniform(2, 5.5)   # 次の敵攻撃感覚のリセット
+                    if self.life == 2:        # ノーコンティニューの場合
+                        self.enemyAttack = random.uniform(1.2, 2.5)   # 次の敵攻撃感覚のリセット
+                    else:                     # コンティニューあり
+                        self.enemyAttack = random.uniform(2, 4.0)     # 次の敵攻撃感覚のリセット
                     self.patternJudge = False  # 攻撃判断をリセットする
                 # 攻撃後通常位置に戻る
                 elif elapsed_time >= self.enemyAttack + 0.75:
@@ -471,13 +489,20 @@ class App:
                     self.scene = SCENE_GAMEOVER
                     self.patternJudge = False  # 攻撃判断をリセットする
                     self.scene_start_time = 0  # 次のシーンのためにリセット
-                    self.enemyAttack = random.uniform(5, 7.5)   # 次の敵攻撃感覚のリセット
+                    if self.life == 2:        # ノーコンティニューの場合
+                        self.enemyAttack = random.uniform(2.5, 4.0)   # 次の敵攻撃感覚のリセット
+                    else:                     # コンティニューあり
+                        self.enemyAttack = random.uniform(4, 5.5)     # 次の敵攻撃感覚のリセット
                     pyxel.playm(0, loop=True)
                 elif elapsed_time >= self.enemyAttack + 0.6 and not self.avoidFlg:
                     self.scene = SCENE_GAMEOVER
                     pyxel.playm(0, loop=True)
                 elif self.avoidFlg and elapsed_time >= self.enemyAttack + 0.6:
                     self.scene_start_time = 0  # 次のシーンのためにリセット
+                    if self.life == 2:        # ノーコンティニューの場合
+                        self.enemyAttack = random.uniform(2.5, 4.0)   # 次の敵攻撃感覚のリセット
+                    else:                     # コンティニューあり
+                        self.enemyAttack = random.uniform(4, 6.5)     # 次の敵攻撃感覚のリセット
                     self.enemyAttack = random.uniform(5, 7.5)   # 次の敵攻撃感覚のリセット
                     self.patternJudge = False  # 攻撃判断をリセットする
 
@@ -592,6 +617,7 @@ class App:
         elif self.scene == SCENE_LOADING:
             self.draw_loading_scene()
         elif self.scene == SCENE_BATTLE:
+            self.draw_enemy_gauge()
             self.draw_battle_scene()
         elif self.scene == SCENE_GAMEOVER:
             self.draw_gameover_scene()
@@ -600,9 +626,28 @@ class App:
         elif self.scene == SCENE_CLEAR:
             self.draw_clear_scene()
         elif self.scene == SCENE_SECOND_BATTLE:
+            self.draw_enemy_gauge()
             self.draw_second_battle_scene()
         elif self.scene == SCENE_THIRD_BATTLE:
+            self.draw_enemy_gauge()
             self.draw_third_battle_scene()
+
+
+
+    def draw_enemy_gauge(self):
+    # 敵の体力ゲージを描画
+        gauge_x = 10
+        gauge_y = 10
+        gauge_width = 4
+        gauge_height = self.maxEnemyLife / 8
+        gauge_color = pyxel.COLOR_RED
+        pyxel.rect(gauge_x, gauge_y, gauge_width, gauge_height, gauge_color)
+        # 敵の残り体力に応じてゲージを減らす
+        gauge_remain_height = int(gauge_height * (self.enemyLife / self.maxEnemyLife))
+        pyxel.rect(gauge_x, gauge_y + gauge_height - gauge_remain_height, gauge_width, gauge_remain_height, pyxel.COLOR_GREEN)
+        #敵の体力が10未満になると黄色ゲージを表示
+        if gauge_remain_height == 0:
+            pyxel.rect(gauge_x, gauge_y + gauge_height - gauge_remain_height - 1, gauge_width, 1, pyxel.COLOR_YELLOW)
 
     # 初期画面
     def draw_title_scene(self):
@@ -623,6 +668,9 @@ class App:
                 self.scene_start_time = self.timeCount
             # 経過時間を計算
             elapsed_time = self.timeCount - self.scene_start_time
+
+            #敵のライフのふち
+            pyxel.blt(10, 9, 1, 222, 10, 4, 17, 6)
 
             # 敵側UI
             if elapsed_time >= self.enemyAttack - 0.5 and elapsed_time <= self.enemyAttack:
@@ -671,6 +719,9 @@ class App:
     def draw_second_battle_scene(self):
         if not self.pause:
             self.player.draw()
+
+            #敵のライフのふち
+            pyxel.blt(10, 9, 1, 228, 10, 4, 25, 6)
 
             # 敵の画像
             # シーンが始まった瞬間に時間を設定
@@ -771,6 +822,9 @@ class App:
                 self.scene_start_time = self.timeCount
             # 経過時間を計算
             elapsed_time = self.timeCount - self.scene_start_time
+
+            #敵のライフのふち
+            pyxel.blt(10, 9, 1, 234, 10, 4, 34, 6)
 
             # 敵側UI
             # 右手攻撃
