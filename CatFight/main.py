@@ -146,7 +146,7 @@ class App:
 
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
             if self.levelSet:
-                self.battleStage = 1                                # ステージ設定
+                self.battleStage = 3                                # ステージ設定
                 self.loudingTimeCount = time.time()
                 self.scene = SCENE_LOADING
                 self.levelSet = False
@@ -195,6 +195,7 @@ class App:
                 self.pauseTimeCount = 0         # ポーズカウントを0にする
                 self.disableAvoidFlg = False    # 避けた後一定時間避けられなくするフラグ
                 self.startTimeFlg = True
+                self.loadMusic = True
                 self.scene = SCENE_SECOND_BATTLE
                 pyxel.playm(1, loop=True)
         elif self.battleStage == 3:
@@ -212,6 +213,7 @@ class App:
                 self.pauseTimeCount = 0         # ポーズカウントを0にする
                 self.disableAvoidFlg = False    # 避けた後一定時間避けられなくするフラグ
                 self.startTimeFlg = True
+                self.loadMusic = True
                 self.scene = SCENE_THIRD_BATTLE
                 self.patternJudge = False       # ジャッジフラグのリセット
                 pyxel.playm(4, loop=True)
@@ -468,7 +470,7 @@ class App:
                 self.disableAvoidFlg = False
 
             # 敵側動作
-            # 35%右手攻撃、35%左手攻撃、30%コンボ攻撃
+            # チャレンジモード35%右手攻撃、35%左手攻撃、30%コンボ攻撃
             num = random.random()
             if not self.patternJudge:
                 if num < 0.35:
@@ -545,7 +547,6 @@ class App:
                         self.enemyAttack = random.uniform(2.5, 4.0)   # 次の敵攻撃感覚のリセット
                     else:                     # コンティニューあり
                         self.enemyAttack = random.uniform(4, 5.5)     # 次の敵攻撃感覚のリセット
-                    pyxel.playm(0, loop=True)
                 elif elapsed_time >= self.enemyAttack + 0.6 and not self.avoidFlg:
                     self.enemyMusic = True
                     self.game_over()
@@ -574,7 +575,7 @@ class App:
                 self.pauseEnemyFlg = False
                 self.pouseCount -= 1
             self.pouseFlg = False
-            pyxel.playm(1, loop=True)
+            pyxel.playm(4, loop=True)
             # ポーズ状態を反転させる
             self.pause = not self.pause
 
@@ -734,8 +735,6 @@ class App:
         elif self.scene == SCENE_THIRD_BATTLE:
             self.draw_enemy_gauge()
             self.draw_third_battle_scene()
-
-
 
     def draw_enemy_gauge(self):
     # 敵の体力ゲージを描画
