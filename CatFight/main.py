@@ -642,7 +642,6 @@ class App:
             self.retry = True
             self.end = False
             self.scene = SCENE_TITLE
-            
                 # elif self.life > 0 and pyxel.btnp(pyxel.KEY_S) and not self.retry and not self.retry or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and not self.retry and not self.retry:
                 #     self.retry = True
                 #     self.end = False
@@ -744,7 +743,7 @@ class App:
         gauge_y = 10
         gauge_width = 4
         if self.stoicModeFlg:
-            gauge_height = self.maxEnemyLife / 6
+            gauge_height = self.maxEnemyLife / 8
         else:
             gauge_height = self.maxEnemyLife / 6
         gauge_color = pyxel.COLOR_RED
