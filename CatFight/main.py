@@ -501,7 +501,7 @@ class App:
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.5:
                     self.startTimeFlg = True  # 次のシーンのためにフラグを立てる
                     self.enemyMusic = True
-                    if self.life == 2:        # ノーコンティニューの場合
+                    if self.life == 2 and self.stoicModeFlg :        # ノーコンティニューの場合
                         self.enemyAttack = random.uniform(1, 2.0)   # 次の敵攻撃感覚のリセット
                     else:                     # コンティニューあり
                         self.enemyAttack = random.uniform(1, 3.5)     # 次の敵攻撃感覚のリセット
@@ -519,7 +519,7 @@ class App:
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.75:
                     self.enemyMusic = True
                     self.scene_start_time = 0  # 次のシーンのためにリセット
-                    if self.life == 2:        # ノーコンティニューの場合
+                    if self.life == 2 and self.stoicModeFlg:        # ノーコンティニューの場合
                         self.enemyAttack = random.uniform(1.2, 2.5)   # 次の敵攻撃感覚のリセット
                     else:                     # コンティニューあり
                         self.enemyAttack = random.uniform(2, 4.0)     # 次の敵攻撃感覚のリセット
@@ -541,7 +541,7 @@ class App:
                     self.scene_start_time = 0  # 次のシーンのためにリセット
                     self.enemyMusic = True
                     self.game_over()
-                    if self.life == 2:        # ノーコンティニューの場合
+                    if self.life == 2 and self.stoicModeFlg:        # ノーコンティニューの場合
                         self.enemyAttack = random.uniform(2.5, 4.0)   # 次の敵攻撃感覚のリセット
                     else:                     # コンティニューあり
                         self.enemyAttack = random.uniform(4, 5.5)     # 次の敵攻撃感覚のリセット
@@ -552,7 +552,7 @@ class App:
                 elif self.avoidFlg and elapsed_time >= self.enemyAttack + 0.6:
                     self.enemyMusic = True
                     self.scene_start_time = 0  # 次のシーンのためにリセット
-                    if self.life == 2:        # ノーコンティニューの場合
+                    if self.life == 2 and self.stoicModeFlg:        # ノーコンティニューの場合
                         self.enemyAttack = random.uniform(2.5, 4.0)   # 次の敵攻撃感覚のリセット
                     else:                     # コンティニューあり
                         self.enemyAttack = random.uniform(4, 6.5)     # 次の敵攻撃感覚のリセット
