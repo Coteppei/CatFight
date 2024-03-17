@@ -622,7 +622,7 @@ class App:
                         self.startTimeFlg = True
                         self.scene_start_time = 0
                         self.scene = SCENE_THIRD_BATTLE
-                elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) and self.retry or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN and self.retry):
+                elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) and self.retry or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN) and self.retry:
                     # 下ボタンを押すとエンドフラグを立てる
                     pyxel.play(3, 2)
                     self.retry = False
@@ -638,9 +638,11 @@ class App:
             self.gameoverMusic = False
         elif self.life == 0 and now > self.gameoverMusicTimer + 4:
             self.gameoverMusic = True
-            self.scene = SCENE_TITLE
+            pyxel.playm(2, loop=True)
             self.retry = True
             self.end = False
+            self.scene = SCENE_TITLE
+            
                 # elif self.life > 0 and pyxel.btnp(pyxel.KEY_S) and not self.retry and not self.retry or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and not self.retry and not self.retry:
                 #     self.retry = True
                 #     self.end = False
@@ -656,6 +658,7 @@ class App:
             pyxel.play(3, 31)
             # エンドフラグが立っているとタイトル画面に戻る
             self.end = False
+            pyxel.playm(2, loop=True)
             self.scene = SCENE_TITLE
         elif pyxel.btnp(pyxel.KEY_DOWN) and self.end or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN) and self.end:
             # リトライフラグを立てる
