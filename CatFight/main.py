@@ -61,17 +61,24 @@ class App:
         pyxel.load("assets/character.pyxres")
         self.mouse_center_y = pyxel.height // 2
 
-        # 敵の画像表示
-        pyxel.sounds[0].set("a3a2c1a1", "p", "7", "s", 5)
-        pyxel.sounds[1].set("a3a2c2c2", "n", "7742", "s", 10)
-        load_bgm(0, "assets/bgm_title.json", 2, 3, 4)
-        load_bgm(1, "assets/bgm_play.json", 5, 6, 7)
+        # サウンド設定
+        # pyxel.sounds[0].set("a3a2c1a1", "p", "7", "s", 5)
+        # pyxel.sounds[1].set("a3a2c2c2", "n", "7742", "s", 10)
+        # ここに指定されていない番号を使えば、soundeditのものを読み込む仕様
+        # load_bgm(0, "assets/bgm_title.json", 6, 7, 8)
+        # load_bgm(1, "assets/bgm_play.json", 5, 6, 7)
+        load_bgm(1, "assets/battleMusic.json", 9, 10, 11)
+        load_bgm(2, "assets/opMusic.json", 15, 16, 17)
+        load_bgm(4, "assets/lastMusic.json", 18, 19, 20)
+        load_bgm(6, "assets/EdMusic.json",21,22,23)
         self.scene = SCENE_TITLE
         self.score = 0
+        self.stoicModeFlg = False           # ストイックモードかチャレンジモードか分岐するためのフラグ
+        self.levelSet = False               # ゲーム難易度設定
 
         self.background = Background()
         self.player = Player(pyxel.width / 2, pyxel.height - 20)
-        pyxel.playm(0, loop=True)
+        pyxel.playm(2, loop=True)
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -95,7 +102,6 @@ class App:
 
     def update_title_scene(self):
         self.life = 2
-        self.IfLihe = self.life
         self.enemyLife = 120                 # ブランケンの体力
         self.maxEnemyLife = self.enemyLife
         self.avoidFlg = False
@@ -123,6 +129,12 @@ class App:
         self.nextFlg = False                # 次のステージへ遷移するためのフラグ
         self.startTimeFlg = False           # バトル開始時間を計測開始するためのフラグ
         self.disableAvoidFlg = False        # 避けた後一定時間避けられなくするフラグ
+        self.enemyMusic = True              # 敵の動作時に攻撃効果音
+        self.loadMusic = True
+        self.gameoverMusic = True
+        self.gameoverMusicTimer = 0         # ゲームオーバー時の時間計測
+        self.gameclearMusicTimer = 0        # ゲームクリア時の時間計測
+
 
         pyxel.image(1).load(0, 0, "assets/firstLoading.png")    # 1回目のロード画面
         pyxel.image(1).load(0, 0, "assets/2ndLoading.png")      # 2回目のロード画面
@@ -131,25 +143,51 @@ class App:
         pyxel.image(1).load(0, 0, "assets/2ndRing.png")         # 2回戦目の背景
         pyxel.image(1).load(0, 0, "assets/3rdRing.png")         # 3回戦目の背景
         pyxel.image(1).load(0, 0, "assets/CatFight_OP.png")     # オープニング画面
+
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
-            self.battleStage = 1                                # ステージ設定
-            self.loudingTimeCount = time.time()
-            self.scene = SCENE_LOADING
+            if self.levelSet:
+                self.battleStage = 1                                # ステージ設定
+                self.loudingTimeCount = time.time()
+                self.scene = SCENE_LOADING
+                self.levelSet = False
+            else:
+                self.levelSet = True
+                pyxel.play(3, 31)
+
+        if pyxel.btnp(pyxel.KEY_DOWN) and not self.stoicModeFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN) and not self.stoicModeFlg:
+            self.stoicModeFlg = True
+            pyxel.play(3, 2)
+        elif pyxel.btnp(pyxel.KEY_UP) and self.stoicModeFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP) and self.stoicModeFlg:
+            self.stoicModeFlg = False
+            pyxel.play(3, 2)
 
     # 戦闘直前ロード画面
     def update_loading_scene(self):
+        if self.loadMusic:
+            pyxel.stop()
+            pyxel.play(3, 31)
+            self.loadMusic = False
         if self.battleStage == 1:
             pyxel.image(1).load(0, 0, "assets/firstLoading.png")
             if time.time() > self.loudingTimeCount + 5:
+                if self.stoicModeFlg:
+                    self.enemyLife = 120                 # ブランケンの体力
+                else:
+                    self.enemyLife = 90
+                self.maxEnemyLife = self.enemyLife
                 self.enemyAttack = random.uniform(6, 7.5)
                 self.startTimeFlg = True
+                self.loadMusic = True
                 self.scene = SCENE_BATTLE
                 pyxel.playm(1, loop=True)
         elif self.battleStage == 2:
             pyxel.image(1).load(0, 0, "assets/2ndLoading.png")
             if time.time() > self.loudingTimeCount + 5:
                 self.pouseCount = 1             # ポーズの回数を制限
-                self.enemyLife = 160            # 一トンの体力
+                if self.stoicModeFlg:
+                    self.enemyLife = 160            # 一トンの体力
+                else:
+                    self.enemyLife = 120
                 self.maxEnemyLife = self.enemyLife
                 self.enemyAttack = random.uniform(5.5, 6.5)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
@@ -163,7 +201,10 @@ class App:
             pyxel.image(1).load(0, 0, "assets/3rdLoading.png")
             if time.time() > self.loudingTimeCount + 5:
                 self.pouseCount = 1              # ポーズの回数を制限
-                self.enemyLife = 240             # リラマッチョの体力
+                if self.stoicModeFlg:
+                    self.enemyLife = 240             # リラマッチョの体力
+                else:
+                    self.enemyLife = 180
                 self.maxEnemyLife = self.enemyLife
                 self.enemyAttack = random.uniform(3, 6)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
@@ -173,7 +214,7 @@ class App:
                 self.startTimeFlg = True
                 self.scene = SCENE_THIRD_BATTLE
                 self.patternJudge = False       # ジャッジフラグのリセット
-                pyxel.playm(1, loop=True)
+                pyxel.playm(4, loop=True)
 
     # バトル画面
     def update_battle_scene(self):
@@ -187,18 +228,16 @@ class App:
                 self.timeCount = time.time()
             else:
                 # ポーズ中の時間を経過時間から引いてポーズ直前に戻る
-                # self.pauseTimeCount
                 self.timeCount = time.time() - (self.pauseTimeCount - self.pauseStartTimeCount)
 
             # 攻撃動作
             if (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
-                pyxel.play(3, 0)
+                pyxel.play(3, 1)
                 self.enemyLife -= 1
                 self.attackFlg = True
                 # 攻撃により相手のライフを0にしたとき、クリアを表示する
                 if self.enemyLife == 0:
-                    self.scene = SCENE_CLEAR
-                    pyxel.playm(0, loop=True)
+                    self.game_clear()
             # 回避動作
             if self.avoidanceRestrictions > 0:
                 if pyxel.btnp(pyxel.KEY_Z) and not self.disableAvoidFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A) and not self.disableAvoidFlg:
@@ -215,10 +254,8 @@ class App:
                         self.avoidFlg = False
                         self.punchFlg = True
                         self.avoidanceRestrictions -=1
-                        if self.enemyLife < self.maxEnemyLife - 10:  # 敵の体力が最大値-10未満の場合に加算
-                            self.enemyLife += 10
-                        elif self.enemyLife >= self.maxEnemyLife -10 and self.enemyLife < self.maxEnemyLife:  # 最大値-10以上かつ最大値未満の場合に強制的にmax値にする
-                            self.enemyLife = self.maxEnemyLife
+                        if self.stoicModeFlg:
+                            self.stoicModeLife()
 
             if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
                 self.disableAvoidFlg = False
@@ -231,18 +268,25 @@ class App:
             elapsed_time = self.timeCount - self.scene_start_time
             # 攻撃動作
             if elapsed_time >= self.enemyAttack:
+
+                # 敵の攻撃効果音追加
+                if elapsed_time >= self.enemyAttack + 0.3 and self.enemyMusic:
+                    pyxel.play(3, 5)
+                    self.enemyMusic = False
+
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.5:
                     self.startTimeFlg = True  # 次のシーンのためにリセット
+                    self.enemyMusic = True
                     self.enemyAttack = random.uniform(2.5, 4.5)   # 次の敵攻撃感覚のリセット
-                # 攻撃後通常位置に戻る
-                elif elapsed_time >= self.enemyAttack + 0.5:
-                    self.scene = SCENE_GAMEOVER
-                    pyxel.playm(0, loop=True)
 
-            for enemy in enemies:
-                pyxel.play(3, 1)
-                self.scene = SCENE_GAMEOVER
+                # 避けてなければゲームオーバー
+                elif elapsed_time >= self.enemyAttack + 0.5:
+                    self.game_over()
+
+            # for enemy in enemies:
+            #     pyxel.play(3, 0)
+            #     self.scene = SCENE_GAMEOVER
 
             self.player.update()
         else:
@@ -280,13 +324,13 @@ class App:
 
             # 攻撃動作
             if (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
-                pyxel.play(3, 0)
+                pyxel.play(3, 1)
                 self.enemyLife -= 1
                 self.attackFlg = True
                 # 攻撃により相手のライフを0にしたとき、クリアを表示する
                 if self.enemyLife == 0:
-                    self.scene = SCENE_CLEAR
-                    pyxel.playm(0, loop=True)
+                    self.game_clear()
+
             # 回避動作
             if self.avoidanceRestrictions > 0:
                 if pyxel.btnp(pyxel.KEY_Z) and not self.disableAvoidFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A) and not self.disableAvoidFlg:
@@ -303,10 +347,8 @@ class App:
                         self.avoidFlg = False
                         self.punchFlg = True
                         self.avoidanceRestrictions -=1
-                        if self.enemyLife < self.maxEnemyLife - 10:  # 敵の体力が最大値-10未満の場合に加算
-                            self.enemyLife += 10
-                        elif self.enemyLife >= self.maxEnemyLife -10 and self.enemyLife < self.maxEnemyLife:  # 最大値-10以上かつ最大値未満の場合に強制的にmax値にする
-                            self.enemyLife = self.maxEnemyLife
+                        if self.stoicModeFlg:
+                            self.stoicModeLife()
 
             if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
                 self.disableAvoidFlg = False
@@ -329,35 +371,37 @@ class App:
             # 攻撃動作
             # 通常攻撃
             if elapsed_time >= self.enemyAttack and not self.hipstrikeFlg:
+                # 敵の攻撃効果音追加
+                if elapsed_time >= self.enemyAttack + 0.3 and self.enemyMusic:
+                    pyxel.play(3, 5)
+                    self.enemyMusic = False
+
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.5:
                     self.startTimeFlg = True  # 次のシーンのためにフラグセット
                     self.enemyAttack = random.uniform(1.5, 5)   # 次の敵攻撃感覚のリセット
                     self.patternJudge = False  # 攻撃判断をリセットする
+                    self.enemyMusic = True
                 # 避けれていなかったらゲームオーバー
                 elif elapsed_time >= self.enemyAttack + 0.5:
-                    self.scene = SCENE_GAMEOVER
-                    pyxel.playm(0, loop=True)
+                    self.game_over()
 
             # 攻撃動作
             # ヒップストライク
             if elapsed_time >= self.enemyAttack and self.hipstrikeFlg:
+                # 敵の攻撃効果音追加
+                if elapsed_time >= self.enemyAttack + 0.4 and self.enemyMusic:
+                    pyxel.play(3, 5)
+                    self.enemyMusic = False
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.6:
                     self.scene_start_time = 0  # 次のシーンのためにリセット
                     self.enemyAttack = random.uniform(1, 5)   # 次の敵攻撃感覚のリセット
+                    self.enemyMusic = True
                     self.patternJudge = False   # 攻撃判断をリセットする
                 # 避けれていなかったらゲームオーバー
                 elif elapsed_time >= self.enemyAttack + 0.6:
-
-                    #デバッグ状態
-                    self.scene = SCENE_GAMEOVER
-                    pyxel.playm(0, loop=True)
-
-            for enemy in enemies:
-                pyxel.play(3, 1)
-                self.scene = SCENE_GAMEOVER
-
+                    self.game_over()
             self.player.update()
         else:
             if self.pauseEnemyFlg == False:
@@ -395,14 +439,12 @@ class App:
 
             # 攻撃動作
             if (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
-                pyxel.play(3, 0)
+                pyxel.play(3, 1)
                 self.enemyLife -= 1
                 self.attackFlg = True
                 # 攻撃により相手のライフを0にしたとき、クリアを表示する
                 if self.enemyLife == 0:
-
-                    self.scene = SCENE_CLEAR
-                    pyxel.playm(0, loop=True)
+                    self.game_clear()
             # 回避動作
             if self.avoidanceRestrictions > 0:
                 if pyxel.btnp(pyxel.KEY_Z) and not self.disableAvoidFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A) and not self.disableAvoidFlg:
@@ -419,10 +461,8 @@ class App:
                         self.avoidFlg = False
                         self.punchFlg = True
                         self.avoidanceRestrictions -=1
-                        if self.enemyLife < self.maxEnemyLife - 10:  # 敵の体力が最大値-10未満の場合に加算
-                            self.enemyLife += 10
-                        elif self.enemyLife >= self.maxEnemyLife -10 and self.enemyLife < self.maxEnemyLife:  # 最大値-10以上かつ最大値未満の場合に強制的にmax値にする
-                            self.enemyLife = self.maxEnemyLife
+                        if self.stoicModeFlg:
+                            self.stoicModeLife()
 
             if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
                 self.disableAvoidFlg = False
@@ -455,8 +495,12 @@ class App:
             # 右手攻撃動作
             if elapsed_time >= self.enemyAttack and self.right_hand_flg:
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
+                if elapsed_time >= self.enemyAttack + 0.3 and self.enemyMusic:
+                    pyxel.play(3, 5)
+                    self.enemyMusic = False
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.5:
                     self.startTimeFlg = True  # 次のシーンのためにフラグを立てる
+                    self.enemyMusic = True
                     if self.life == 2:        # ノーコンティニューの場合
                         self.enemyAttack = random.uniform(1, 2.0)   # 次の敵攻撃感覚のリセット
                     else:                     # コンティニューあり
@@ -464,13 +508,16 @@ class App:
                     self.patternJudge = False   # 攻撃判断をリセットする
                 # 攻撃後通常位置に戻る
                 elif elapsed_time >= self.enemyAttack + 0.5:
-                    self.scene = SCENE_GAMEOVER
-                    pyxel.playm(0, loop=True)
+                    self.game_over()
 
             # 左手攻撃動作
             if elapsed_time >= self.enemyAttack and self.left_hand_flg:
+                if elapsed_time >= self.enemyAttack + 0.55 and self.enemyMusic:
+                    pyxel.play(3, 5)
+                    self.enemyMusic = False
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
                 if self.avoidFlg == True and elapsed_time >= self.enemyAttack + 0.75:
+                    self.enemyMusic = True
                     self.scene_start_time = 0  # 次のシーンのためにリセット
                     if self.life == 2:        # ノーコンティニューの場合
                         self.enemyAttack = random.uniform(1.2, 2.5)   # 次の敵攻撃感覚のリセット
@@ -479,25 +526,31 @@ class App:
                     self.patternJudge = False  # 攻撃判断をリセットする
                 # 攻撃後通常位置に戻る
                 elif elapsed_time >= self.enemyAttack + 0.75:
-                    self.scene = SCENE_GAMEOVER
-                    pyxel.playm(0, loop=True)
+                    self.game_over()
 
             # コングコンボ攻撃動作
             if elapsed_time >= self.enemyAttack and self.combo_flg:
                 # このときプレイヤー側が避ける動作をしていた場合、攻撃を無効化する
+                # 敵の攻撃効果音追加
+                if elapsed_time >= self.enemyAttack + 0.3 and self.enemyMusic:
+                    pyxel.play(3, 32)
+                    self.enemyMusic = False
                 if elapsed_time >= self.enemyAttack + 0.5 and not self.avoidFlg:
-                    self.scene = SCENE_GAMEOVER
+                    pyxel.play(3, 1)
                     self.patternJudge = False  # 攻撃判断をリセットする
                     self.scene_start_time = 0  # 次のシーンのためにリセット
+                    self.enemyMusic = True
+                    self.game_over()
                     if self.life == 2:        # ノーコンティニューの場合
                         self.enemyAttack = random.uniform(2.5, 4.0)   # 次の敵攻撃感覚のリセット
                     else:                     # コンティニューあり
                         self.enemyAttack = random.uniform(4, 5.5)     # 次の敵攻撃感覚のリセット
                     pyxel.playm(0, loop=True)
                 elif elapsed_time >= self.enemyAttack + 0.6 and not self.avoidFlg:
-                    self.scene = SCENE_GAMEOVER
-                    pyxel.playm(0, loop=True)
+                    self.enemyMusic = True
+                    self.game_over()
                 elif self.avoidFlg and elapsed_time >= self.enemyAttack + 0.6:
+                    self.enemyMusic = True
                     self.scene_start_time = 0  # 次のシーンのためにリセット
                     if self.life == 2:        # ノーコンティニューの場合
                         self.enemyAttack = random.uniform(2.5, 4.0)   # 次の敵攻撃感覚のリセット
@@ -505,11 +558,6 @@ class App:
                         self.enemyAttack = random.uniform(4, 6.5)     # 次の敵攻撃感覚のリセット
                     self.enemyAttack = random.uniform(5, 7.5)   # 次の敵攻撃感覚のリセット
                     self.patternJudge = False  # 攻撃判断をリセットする
-
-            for enemy in enemies:
-                pyxel.play(3, 1)
-                self.scene = SCENE_GAMEOVER
-
             self.player.update()
         else:
             if self.pauseEnemyFlg == False:
@@ -532,80 +580,133 @@ class App:
 
     # ゲームオーバー画面
     def update_gameover_scene(self):
-        if self.life > 0 and pyxel.btnp(pyxel.KEY_UP) or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
-            # 上ボタンを押すとリトライを立てる
+        now = time.time()
+        if now > self.gameoverMusicTimer + 0.2 and self.life > 0:
+            if self.life > 0 and self.gameoverMusic:
+                pyxel.play(3, 14)
+                self.gameoverMusic = False
+            elif self.gameoverMusic:
+                pyxel.play(3, 13)
+            if now > self.gameoverMusicTimer + 3:
+                if not self.retry and not self.end:
+                    self.retry = True
+                    self.end = False
+                if self.life > 0 and pyxel.btnp(pyxel.KEY_UP) and self.end or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP) and self.end:
+                    # 上ボタンを押すとリトライを立てる
+                    self.retry = True
+                    self.end = False
+                    pyxel.play(3, 2)
+                elif pyxel.btnp(pyxel.KEY_S) and self.retry or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.retry:
+                    # リトライフラグが立っていると再挑戦する
+                    self.retry = False
+                    self.pouseCount = 1
+                    self.life -= 1
+                    self.pauseTimeCount = 0
+                    self.scene = SCENE_BATTLE
+                    if self.battleStage < 3:
+                        pyxel.playm(1, loop=True)
+                    else:
+                        pyxel.playm(4, loop=True)
+                    if self.battleStage == 1:
+                        self.enemyAttack = random.uniform(5, 7.5)
+                        self.scene_start_time = 0
+                        self.startTimeFlg = True
+                        self.scene = SCENE_BATTLE
+                    elif self.battleStage == 2:
+                        self.enemyAttack = random.uniform(4.5, 6.5)
+                        self.scene_start_time = 0
+                        self.startTimeFlg = True
+                        self.scene = SCENE_SECOND_BATTLE
+                    elif self.battleStage == 3:
+                        self.enemyAttack = random.uniform(4, 6)
+                        self.startTimeFlg = True
+                        self.scene_start_time = 0
+                        self.scene = SCENE_THIRD_BATTLE
+                elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) and self.retry or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN and self.retry):
+                    # 下ボタンを押すとエンドフラグを立てる
+                    pyxel.play(3, 2)
+                    self.retry = False
+                    self.end = True
+                elif pyxel.btnp(pyxel.KEY_S) and self.end or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.end:
+                    pyxel.play(3, 31)
+                    #　エンドフラグが立っていると本当にやめる画面に遷移する。
+                    self.retry = True
+                    self.end = False
+                    self.scene = SCENE_CONFIMATION
+        elif self.life == 0 and self.gameoverMusic:
+            pyxel.play(3, 13)
+            self.gameoverMusic = False
+        elif self.life == 0 and now > self.gameoverMusicTimer + 4:
+            self.gameoverMusic = True
+            self.scene = SCENE_TITLE
             self.retry = True
             self.end = False
-        elif pyxel.btnp(pyxel.KEY_S) and self.retry or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.retry:
-            # リトライフラグが立っていると再挑戦する
-            self.retry = False
-            self.pouseCount = 1
-            self.life -= 1
-            self.pauseTimeCount = 0
-            self.scene = SCENE_BATTLE
-            pyxel.playm(1, loop=True)
-            if self.battleStage == 1:
-                self.enemyAttack = random.uniform(5, 7.5)
-                self.scene_start_time = 0
-                self.startTimeFlg = True
-                self.scene = SCENE_BATTLE
-            elif self.battleStage == 2:
-                self.enemyAttack = random.uniform(4.5, 6.5)
-                self.scene_start_time = 0
-                self.startTimeFlg = True
-                self.scene = SCENE_SECOND_BATTLE
-            elif self.battleStage == 3:
-                self.enemyAttack = random.uniform(4, 6)
-                self.startTimeFlg = True
-                self.scene_start_time = 0
-                self.scene = SCENE_THIRD_BATTLE
-        elif self.life > 0 and pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
-            # 下ボタンを押すとエンドフラグを立てる
-            self.retry = False
-            self.end = True
-        elif pyxel.btnp(pyxel.KEY_S) and self.end or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.end:
-            #　エンドフラグが立っていると本当にやめる画面に遷移する。
-            self.retry = True
-            self.end = False
-            self.scene = SCENE_CONFIMATION
-        elif self.life == 0:
-            # 残機を失ったら強制ゲームオーバー
-            if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
-                self.scene = SCENE_TITLE
-        elif self.life > 0 and pyxel.btnp(pyxel.KEY_W) and not self.retry and not self.retry or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_Y) and not self.retry and not self.retry:
-            self.retry = True
-            self.end = False
+                # elif self.life > 0 and pyxel.btnp(pyxel.KEY_S) and not self.retry and not self.retry or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and not self.retry and not self.retry:
+                #     self.retry = True
+                #     self.end = False
 
     # endを選択したときの分岐画面
     def update_confimation_scene(self):
-        if pyxel.btnp(pyxel.KEY_UP) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP):
+        if pyxel.btnp(pyxel.KEY_UP) and self.retry or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP) and self.retry:
             # エンドフラグを立てる
             self.retry = False
             self.end = True
+            pyxel.play(3, 2)
         elif pyxel.btnp(pyxel.KEY_S) and self.end or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.end:
+            pyxel.play(3, 31)
             # エンドフラグが立っているとタイトル画面に戻る
             self.end = False
             self.scene = SCENE_TITLE
-        elif pyxel.btnp(pyxel.KEY_DOWN) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN):
+        elif pyxel.btnp(pyxel.KEY_DOWN) and self.end or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN) and self.end:
             # リトライフラグを立てる
             self.retry = True
             self.end = False
+            pyxel.play(3, 2)
         elif pyxel.btnp(pyxel.KEY_S) and self.retry or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.retry:
+            pyxel.play(3, 31)
             # リトライフラグが立っているとゲームーオーバー画面に戻る
             self.retry = False
             self.end = True
             self.scene = SCENE_GAMEOVER
 
     def update_clear_scene(self):
-        if pyxel.btnp(pyxel.KEY_W) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_Y) and self.battleStage < 3:
+        now = time.time()
+        if now > self.gameclearMusicTimer + 3:
             self.nextFlg = True
             self.pauseTimeCount = 0
-        elif pyxel.btnp(pyxel.KEY_S) and self.nextFlg and self.battleStage < 3 or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.nextFlg and self.battleStage < 3:
-            self.nextFlg = False
-            self.battleStage += 1
-            self.scene_start_time = 0
-            self.loudingTimeCount = time.time()
-            self.scene = SCENE_LOADING
+            if pyxel.btnp(pyxel.KEY_S) and self.nextFlg and self.battleStage < 3 or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and self.nextFlg and self.battleStage < 3:
+                self.nextFlg = False
+                self.battleStage += 1
+                self.scene_start_time = 0
+                self.loudingTimeCount = time.time()
+                self.scene = SCENE_LOADING
+
+    # ゲームクリア時に呼び出す
+    def game_clear(self):
+        pyxel.stop()
+        if self.battleStage == 3:
+            pyxel.playm(6, loop=True)
+        else:
+            pyxel.play(3, 30)
+
+        self.gameclearMusicTimer = time.time()
+        self.scene = SCENE_CLEAR
+
+    # ゲームオーバー時に呼び出す
+    def game_over(self):
+        pyxel.stop()
+        pyxel.play(3, 0)
+        self.enemyMusic = True
+        self.gameoverMusic = True
+        self.gameoverMusicTimer = time.time()
+        self.scene = SCENE_GAMEOVER
+
+    # ストイックモードの時に自動回復機能を付加する
+    def stoicModeLife(self):
+        if self.enemyLife < self.maxEnemyLife - 10:  # 敵の体力が最大値-10未満の場合に加算
+            self.enemyLife += 10
+        elif self.enemyLife >= self.maxEnemyLife -10 and self.enemyLife < self.maxEnemyLife:  # 最大値-10以上かつ最大値未満の場合に強制的にmax値にする
+            self.enemyLife = self.maxEnemyLife
 
 # フロント側
     def draw(self):
@@ -639,7 +740,10 @@ class App:
         gauge_x = 10
         gauge_y = 10
         gauge_width = 4
-        gauge_height = self.maxEnemyLife / 8
+        if self.stoicModeFlg:
+            gauge_height = self.maxEnemyLife / 6
+        else:
+            gauge_height = self.maxEnemyLife / 6
         gauge_color = pyxel.COLOR_RED
         pyxel.rect(gauge_x, gauge_y, gauge_width, gauge_height, gauge_color)
         # 敵の残り体力に応じてゲージを減らす
@@ -653,7 +757,14 @@ class App:
     def draw_title_scene(self):
         # 編集中2
         pyxel.text(25, 45, "Cat Fight!!", pyxel.frame_count % 16)
-        pyxel.text(18, 80, "- GAME START -", 7)
+        if self.stoicModeFlg and self.levelSet:
+            pyxel.text(18, 80, "Challenge Mode", 13)
+            pyxel.text(26, 90, "Stoic Mode", 8)
+        elif not self.stoicModeFlg and self.levelSet:
+            pyxel.text(18, 80, "Challenge Mode", 8)
+            pyxel.text(26, 90, "Stoic Mode", 13)
+        elif not self.levelSet:
+            pyxel.text(18, 85, "- GAME START -", 7)
 
     def draw_loading_scene(self):
         pyxel.blt(-3, 11, 0, 200, 40, 100, 80, 15)        #プレーヤー側の顔
@@ -983,10 +1094,20 @@ class App:
             pyxel.text(33, 60, "YOU WIN", 7)
         elif self.battleStage < 3 and self.nextFlg:
             pyxel.text(26, 60, "NEXT STAGE!!", 7)
-        elif self.life == 2:
-            pyxel.text(10, 55, "No Continue CLEAR", pyxel.frame_count % 16)
-            pyxel.text(27, 65, "Congrats!", pyxel.frame_count % 16)
-        else:
+        elif self.life == 2 and self.stoicModeFlg:
+            pyxel.text(10, 35, "No Continue CLEAR", pyxel.frame_count % 16)
+            pyxel.text(15, 45, "Congratulation!!", pyxel.frame_count % 16)
+            pyxel.text(10, 65, "kokomadeyattekurete",7)
+            pyxel.text(14, 75, "hontouniarigatou.",7)
+            pyxel.text(15, 95, "saikyoudesu!!!!", 7)
+        elif self.life < 2 and self.stoicModeFlg:
             pyxel.text(27, 55, "Congrats!", pyxel.frame_count % 10)
-
+            pyxel.text(23, 75, "Excellent!!!", 7)
+        elif self.life == 2 and not self.stoicModeFlg:
+            pyxel.text(10, 45, "No Continue CLEAR", pyxel.frame_count % 10)
+            pyxel.text(15, 55, "Congratulation!!", pyxel.frame_count % 10)
+            pyxel.text(32, 75, "Great!!", 7)
+        elif self.life < 2 and not self.stoicModeFlg:
+            pyxel.text(27, 55, "Congrats!", pyxel.frame_count % 7)
+            pyxel.text(35, 75, "Nice!", 7)
 App()
