@@ -135,7 +135,6 @@ class App:
         self.gameoverMusicTimer = 0         # ゲームオーバー時の時間計測
         self.gameclearMusicTimer = 0        # ゲームクリア時の時間計測
 
-
         pyxel.image(1).load(0, 0, "assets/firstLoading.png")    # 1回目のロード画面
         pyxel.image(1).load(0, 0, "assets/2ndLoading.png")      # 2回目のロード画面
         pyxel.image(1).load(0, 0, "assets/3rdLoading.png")      # 3回目のロード画面
@@ -146,18 +145,18 @@ class App:
 
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
             if self.levelSet:
-                self.battleStage = 1                                # ステージ設定
+                self.battleStage = 3                                # ステージ設定
                 self.loudingTimeCount = time.time()
-                self.scene = SCENE_LOADING
                 self.levelSet = False
+                self.scene = SCENE_LOADING
             else:
                 self.levelSet = True
                 pyxel.play(3, 31)
 
-        if pyxel.btnp(pyxel.KEY_DOWN) and not self.stoicModeFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN) and not self.stoicModeFlg:
+        if pyxel.btnp(pyxel.KEY_DOWN) and not self.stoicModeFlg and self.levelSet or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_DOWN) and not self.stoicModeFlg and self.levelSet:
             self.stoicModeFlg = True
             pyxel.play(3, 2)
-        elif pyxel.btnp(pyxel.KEY_UP) and self.stoicModeFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP) and self.stoicModeFlg:
+        elif pyxel.btnp(pyxel.KEY_UP) and self.stoicModeFlg and self.levelSet or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_DPAD_UP) and self.stoicModeFlg and self.levelSet:
             self.stoicModeFlg = False
             pyxel.play(3, 2)
 
@@ -205,7 +204,7 @@ class App:
                 if self.stoicModeFlg:
                     self.enemyLife = 240             # リラマッチョの体力
                 else:
-                    self.enemyLife = 180
+                    self.enemyLife = 1
                 self.maxEnemyLife = self.enemyLife
                 self.enemyAttack = random.uniform(3, 6)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
