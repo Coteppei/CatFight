@@ -135,6 +135,7 @@ class App:
         self.gameoverMusicTimer = 0         # ゲームオーバー時の時間計測
         self.gameclearMusicTimer = 0        # ゲームクリア時の時間計測
 
+
         pyxel.image(1).load(0, 0, "assets/firstLoading.png")    # 1回目のロード画面
         pyxel.image(1).load(0, 0, "assets/2ndLoading.png")      # 2回目のロード画面
         pyxel.image(1).load(0, 0, "assets/3rdLoading.png")      # 3回目のロード画面
@@ -145,7 +146,7 @@ class App:
 
         if pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B):
             if self.levelSet:
-                self.battleStage = 3                                # ステージ設定
+                self.battleStage = 1                                # ステージ設定
                 self.loudingTimeCount = time.time()
                 self.levelSet = False
                 self.scene = SCENE_LOADING
@@ -200,7 +201,7 @@ class App:
         elif self.battleStage == 3:
             pyxel.image(1).load(0, 0, "assets/3rdLoading.png")
             if time.time() > self.loudingTimeCount + 5:
-                self.pouseCount = 1              # ポーズの回数を制限
+                self.pouseCount = 180              # ポーズの回数を制限
                 if self.stoicModeFlg:
                     self.enemyLife = 240             # リラマッチョの体力
                 else:
