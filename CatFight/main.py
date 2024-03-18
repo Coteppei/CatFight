@@ -62,11 +62,6 @@ class App:
         self.mouse_center_y = pyxel.height // 2
 
         # サウンド設定
-        # pyxel.sounds[0].set("a3a2c1a1", "p", "7", "s", 5)
-        # pyxel.sounds[1].set("a3a2c2c2", "n", "7742", "s", 10)
-        # ここに指定されていない番号を使えば、soundeditのものを読み込む仕様
-        # load_bgm(0, "assets/bgm_title.json", 6, 7, 8)
-        # load_bgm(1, "assets/bgm_play.json", 5, 6, 7)
         load_bgm(1, "assets/battleMusic.json", 9, 10, 11)
         load_bgm(2, "assets/opMusic.json", 15, 16, 17)
         load_bgm(4, "assets/lastMusic.json", 18, 19, 20)
@@ -135,7 +130,6 @@ class App:
         self.gameoverMusicTimer = 0         # ゲームオーバー時の時間計測
         self.gameclearMusicTimer = 0        # ゲームクリア時の時間計測
 
-
         pyxel.image(1).load(0, 0, "assets/firstLoading.png")    # 1回目のロード画面
         pyxel.image(1).load(0, 0, "assets/2ndLoading.png")      # 2回目のロード画面
         pyxel.image(1).load(0, 0, "assets/3rdLoading.png")      # 3回目のロード画面
@@ -172,8 +166,10 @@ class App:
             if time.time() > self.loudingTimeCount + 5:
                 if self.stoicModeFlg:
                     self.enemyLife = 120                 # ブランケンの体力
+                    self.avoidTime = 0.25
                 else:
                     self.enemyLife = 90
+                    self.avoidTime = 0.3
                 self.maxEnemyLife = self.enemyLife
                 self.enemyAttack = random.uniform(6, 7.5)
                 self.startTimeFlg = True
@@ -201,11 +197,11 @@ class App:
         elif self.battleStage == 3:
             pyxel.image(1).load(0, 0, "assets/3rdLoading.png")
             if time.time() > self.loudingTimeCount + 5:
-                self.pouseCount = 180              # ポーズの回数を制限
+                self.pouseCount = 1              # ポーズの回数を制限
                 if self.stoicModeFlg:
                     self.enemyLife = 240             # リラマッチョの体力
                 else:
-                    self.enemyLife = 1
+                    self.enemyLife = 180
                 self.maxEnemyLife = self.enemyLife
                 self.enemyAttack = random.uniform(3, 6)
                 self.scene_start_time = 0       # 前バトルでの敵の行動と自分の行動を比較するための開始時間をリセット
@@ -223,44 +219,8 @@ class App:
         # 背景画面
         pyxel.image(1).load(0, 0, "assets/ring.png")
         # プレイヤー側操作
-        # 画面上部の押下があったとき、ダメージを相手に与える
-        if not self.pause:        # ポーズ判定を一旦廃止
-            # ポーズ判定
-            if self.pauseTimeCount == 0:
-                self.timeCount = time.time()
-            else:
-                # ポーズ中の時間を経過時間から引いてポーズ直前に戻る
-                self.timeCount = time.time() - (self.pauseTimeCount - self.pauseStartTimeCount)
-
-            # 攻撃動作
-            if (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
-                pyxel.play(3, 1)
-                self.enemyLife -= 1
-                self.attackFlg = True
-                # 攻撃により相手のライフを0にしたとき、クリアを表示する
-                if self.enemyLife == 0:
-                    self.game_clear()
-            # 回避動作
-            if self.avoidanceRestrictions > 0:
-                if pyxel.btnp(pyxel.KEY_Z) and not self.disableAvoidFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A) and not self.disableAvoidFlg:
-                    self.avoidFlg = True
-                    self.actionFlg = True
-                    self.punchFlg = False
-                    self.disableAboidTime = time.time()
-                    self.disableAvoidFlg = True
-                if self.actionFlg:
-                    self.avoid_start_frame = self.timeCount
-                    self.actionFlg = False
-                if self.avoidFlg:
-                    if self.timeCount - self.avoid_start_frame >= 0.25:  # 0.25秒間回避
-                        self.avoidFlg = False
-                        self.punchFlg = True
-                        self.avoidanceRestrictions -=1
-                        if self.stoicModeFlg:
-                            self.stoicModeLife()
-
-            if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
-                self.disableAvoidFlg = False
+        if not self.pause:      # ポーズでないとき
+            self.playerAction()
 
             # 敵側動作
             if self.startTimeFlg:
@@ -315,45 +275,8 @@ class App:
         # 背景画面
         pyxel.image(1).load(0, 0, "assets/2ndRing.png")
         # プレイヤー側操作
-        # 画面上部の押下があったとき、ダメージを相手に与える
-        if not self.pause:        # ポーズ判定を一旦廃止
-            # ポーズ判定
-            if self.pauseTimeCount == 0:
-                self.timeCount = time.time()
-            else:
-                # ポーズ中の時間を経過時間から引いてポーズ直前に戻る
-                self.timeCount = time.time() - (self.pauseTimeCount - self.pauseStartTimeCount)
-
-            # 攻撃動作
-            if (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
-                pyxel.play(3, 1)
-                self.enemyLife -= 1
-                self.attackFlg = True
-                # 攻撃により相手のライフを0にしたとき、クリアを表示する
-                if self.enemyLife == 0:
-                    self.game_clear()
-
-            # 回避動作
-            if self.avoidanceRestrictions > 0:
-                if pyxel.btnp(pyxel.KEY_Z) and not self.disableAvoidFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A) and not self.disableAvoidFlg:
-                    self.avoidFlg = True
-                    self.actionFlg = True
-                    self.punchFlg = False
-                    self.disableAboidTime = time.time()
-                    self.disableAvoidFlg = True
-                if self.actionFlg:
-                    self.avoid_start_frame = self.timeCount
-                    self.actionFlg = False
-                if self.avoidFlg:
-                    if self.timeCount - self.avoid_start_frame >= 0.25:  # 0.25秒間回避
-                        self.avoidFlg = False
-                        self.punchFlg = True
-                        self.avoidanceRestrictions -=1
-                        if self.stoicModeFlg:
-                            self.stoicModeLife()
-
-            if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
-                self.disableAvoidFlg = False
+        if not self.pause:        # ポーズでないとき
+            self.playerAction()
 
             # 敵側動作
             # 30%でヒップストライクが70%で通常攻撃が飛んでくる
@@ -430,44 +353,8 @@ class App:
         # 背景画面
         pyxel.image(1).load(0, 0, "assets/3rdRing.png")
         # プレイヤー側操作
-        # 画面上部の押下があったとき、ダメージを相手に与える
-        if not self.pause:        # ポーズ判定を一旦廃止
-            # ポーズ判定
-            if self.pauseTimeCount == 0:
-                self.timeCount = time.time()
-            else:
-                # ポーズ中の時間を経過時間から引いてポーズ直前に戻る
-                self.timeCount = time.time() - (self.pauseTimeCount - self.pauseStartTimeCount)
-
-            # 攻撃動作
-            if (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
-                pyxel.play(3, 1)
-                self.enemyLife -= 1
-                self.attackFlg = True
-                # 攻撃により相手のライフを0にしたとき、クリアを表示する
-                if self.enemyLife == 0:
-                    self.game_clear()
-            # 回避動作
-            if self.avoidanceRestrictions > 0:
-                if pyxel.btnp(pyxel.KEY_Z) and not self.disableAvoidFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A) and not self.disableAvoidFlg:
-                    self.avoidFlg = True
-                    self.actionFlg = True
-                    self.punchFlg = False
-                    self.disableAboidTime = time.time()
-                    self.disableAvoidFlg = True
-                if self.actionFlg:
-                    self.avoid_start_frame = self.timeCount
-                    self.actionFlg = False
-                if self.avoidFlg:
-                    if self.timeCount - self.avoid_start_frame >= 0.25:  # 0.25秒間回避
-                        self.avoidFlg = False
-                        self.punchFlg = True
-                        self.avoidanceRestrictions -=1
-                        if self.stoicModeFlg:
-                            self.stoicModeLife()
-
-            if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
-                self.disableAvoidFlg = False
+        if not self.pause:        # ポーズでないとき
+            self.playerAction()
 
             # 敵側動作
             # チャレンジモード35%右手攻撃、35%左手攻撃、30%コンボ攻撃
@@ -643,9 +530,6 @@ class App:
             self.retry = True
             self.end = False
             self.scene = SCENE_TITLE
-                # elif self.life > 0 and pyxel.btnp(pyxel.KEY_S) and not self.retry and not self.retry or self.life > 0 and pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B) and not self.retry and not self.retry:
-                #     self.retry = True
-                #     self.end = False
 
     # endを選択したときの分岐画面
     def update_confimation_scene(self):
@@ -710,6 +594,45 @@ class App:
             self.enemyLife += 10
         elif self.enemyLife >= self.maxEnemyLife -10 and self.enemyLife < self.maxEnemyLife:  # 最大値-10以上かつ最大値未満の場合に強制的にmax値にする
             self.enemyLife = self.maxEnemyLife
+
+    # プレイヤー操作
+    def playerAction(self):
+        # ポーズ判定
+        if self.pauseTimeCount == 0:
+                self.timeCount = time.time()
+        else:
+            # ポーズ中の時間を経過時間から引いてポーズ直前に戻る
+            self.timeCount = time.time() - (self.pauseTimeCount - self.pauseStartTimeCount)
+
+        # 攻撃動作
+        if (pyxel.btnp(pyxel.KEY_S) or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_B)) and self.punchFlg == True:
+            pyxel.play(3, 1)
+            self.enemyLife -= 1
+            self.attackFlg = True
+            # 攻撃により相手のライフを0にしたとき、クリアを表示する
+            if self.enemyLife == 0:
+                self.game_clear()
+        # 回避動作
+        if self.avoidanceRestrictions > 0:
+            if pyxel.btnp(pyxel.KEY_Z) and not self.disableAvoidFlg or pyxel.btnp(pyxel.GAMEPAD1_BUTTON_A) and not self.disableAvoidFlg:
+                self.avoidFlg = True
+                self.actionFlg = True
+                self.punchFlg = False
+                self.disableAboidTime = time.time()
+                self.disableAvoidFlg = True
+            if self.actionFlg:
+                self.avoid_start_frame = self.timeCount
+                self.actionFlg = False
+            if self.avoidFlg:
+                if self.timeCount - self.avoid_start_frame >= self.avoidTime:  # 回避時間
+                    self.avoidFlg = False
+                    self.punchFlg = True
+                    self.avoidanceRestrictions -=1
+                    if self.stoicModeFlg:
+                        self.stoicModeLife()
+
+        if self.disableAvoidFlg and time.time() >= self.disableAboidTime + 0.5:
+            self.disableAvoidFlg = False
 
 # フロント側
     def draw(self):
